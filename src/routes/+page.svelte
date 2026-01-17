@@ -1,3 +1,14 @@
-<h1>Welcome to your library project</h1>
-<p>Create your package using @sveltejs/package and preview/showcase your work with SvelteKit</p>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<div class="p-8 font-sans">
+	<h1 class="text-3xl font-bold mb-4">SvelteKit Demo Application</h1>
+	<p class="mb-6">Explore the available demos:</p>
+	<ul class="list-disc pl-5 space-y-2">
+		<li>
+			<a href="/demo/lucia" class="text-blue-600 hover:underline">Authentication (Lucia)</a>
+			- Login and Registration demo.
+		</li>
+		<li>
+			<a href="/demo/paraglide" class="text-blue-600 hover:underline">Localization (Paraglide)</a>
+			- Internationalization demo.
+		</li>
+	</ul>
+</div>

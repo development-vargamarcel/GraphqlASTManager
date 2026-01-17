@@ -80,7 +80,10 @@ export const actions: Actions = {
 			const sessionToken = auth.generateSessionToken();
 			const session = await auth.createSession(sessionToken, userId);
 			auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
-		} catch {
+		} catch (e: any) {
+			if (e.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+				return fail(400, { message: 'Username already taken' });
+			}
 			return fail(500, { message: 'An error has occurred' });
 		}
 		return redirect(302, '/demo/lucia');
