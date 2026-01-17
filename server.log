@@ -1,0 +1,11 @@
+
+> graphqlastmanager@0.0.1 dev
+> vite dev
+
+✔ [paraglide-js] Compilation complete (locale-modules)
+9:49:33 PM [vite] (client) Forced re-optimization of dependencies
+
+  VITE v7.1.10  ready in 2454 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
