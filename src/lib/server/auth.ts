@@ -2,7 +2,8 @@ import type { RequestEvent } from '@sveltejs/kit';
 import { dev } from '$app/environment';
 import { eq } from 'drizzle-orm';
 import { sha256 } from '@oslojs/crypto/sha2';
-import { encodeBase64url, encodeHexLowerCase } from '@oslojs/encoding';
+import { encodeBase64url, encodeHexLowerCase, encodeBase32LowerCase } from '@oslojs/encoding';
+import { hash, verify } from '@node-rs/argon2';
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
 
@@ -16,6 +17,13 @@ export function generateSessionToken() {
 	const bytes = crypto.getRandomValues(new Uint8Array(18));
 	const token = encodeBase64url(bytes);
 	return token;
+}
+
+export function generateUserId() {
+	// ID with 120 bits of entropy, or about the same as UUID v4.
+	const bytes = crypto.getRandomValues(new Uint8Array(15));
+	const id = encodeBase32LowerCase(bytes);
+	return id;
 }
 
 export async function createSession(token: string, userId: string) {
@@ -77,6 +85,24 @@ export function setSessionTokenCookie(event: RequestEvent, token: string, expire
 		httpOnly: true,
 		sameSite: 'lax',
 		secure: !dev
+	});
+}
+
+export async function hashPassword(password: string): Promise<string> {
+	return await hash(password, {
+		memoryCost: 19456,
+		timeCost: 2,
+		outputLen: 32,
+		parallelism: 1
+	});
+}
+
+export async function verifyPassword(hash: string, password: string): Promise<boolean> {
+	return await verify(hash, password, {
+		memoryCost: 19456,
+		timeCost: 2,
+		outputLen: 32,
+		parallelism: 1
 	});
 }
 
