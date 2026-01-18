@@ -25,10 +25,10 @@ export const actions: Actions = {
 		const password = formData.get('password');
 
 		if (!validateUsername(username)) {
-			return fail(400, { message: 'Invalid username (min 3, max 31 characters, alphanumeric only)' });
+			return fail(400, { message: 'Invalid username (3-31 chars, alphanumeric, -, _)' });
 		}
 		if (!validatePassword(password)) {
-			return fail(400, { message: 'Invalid password (min 6, max 255 characters)' });
+			return fail(400, { message: 'Invalid password (6-255 chars)' });
 		}
 
 		const existingUser = await userModel.getUserByUsername(username);
@@ -57,10 +57,10 @@ export const actions: Actions = {
 		const password = formData.get('password');
 
 		if (!validateUsername(username)) {
-			return fail(400, { message: 'Invalid username' });
+			return fail(400, { message: 'Invalid username (3-31 chars, alphanumeric, -, _)' });
 		}
 		if (!validatePassword(password)) {
-			return fail(400, { message: 'Invalid password' });
+			return fail(400, { message: 'Invalid password (6-255 chars)' });
 		}
 
 		const userId = auth.generateUserId();
