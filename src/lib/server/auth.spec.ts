@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as auth from './auth.js';
-import { db } from '$lib/server/db';
-import * as table from '$lib/server/db/schema';
+import { db } from '$lib/server/db/index.js';
+import * as table from '$lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
 import type { RequestEvent } from '@sveltejs/kit';
 
 // Mock the DB module
-vi.mock('$lib/server/db', () => ({
+vi.mock('$lib/server/db/index.js', () => ({
 	db: {
 		insert: vi.fn(),
 		select: vi.fn(),
@@ -14,6 +14,18 @@ vi.mock('$lib/server/db', () => ({
 		update: vi.fn()
 	}
 }));
+
+vi.mock('$lib/server/logger.js', () => {
+	return {
+		Logger: class {
+			constructor(context: string) {}
+			info = vi.fn();
+			warn = vi.fn();
+			error = vi.fn();
+			debug = vi.fn();
+		}
+	};
+});
 
 // Mock crypto
 Object.defineProperty(global, 'crypto', {
@@ -61,9 +73,32 @@ describe('auth', () => {
 			expect(db.insert).toHaveBeenCalledWith(table.session);
 			expect(mockValues).toHaveBeenCalledWith(session);
 		});
+
+		it('should throw error if db insert fails', async () => {
+			const token = 'test-token';
+			const userId = 'user-123';
+			const error = new Error('DB Error');
+
+			const mockValues = vi.fn().mockRejectedValue(error);
+			vi.mocked(db.insert).mockReturnValue({ values: mockValues } as any);
+
+			await expect(auth.createSession(token, userId)).rejects.toThrow('DB Error');
+		});
 	});
 
 	describe('validateSessionToken', () => {
+		it('should return null if db select throws', async () => {
+			const mockFrom = vi.fn().mockReturnValue({
+				innerJoin: vi.fn().mockReturnValue({
+					where: vi.fn().mockRejectedValue(new Error('DB Error'))
+				})
+			});
+			vi.mocked(db.select).mockReturnValue({ from: mockFrom } as any);
+
+			const result = await auth.validateSessionToken('token');
+			expect(result).toEqual({ session: null, user: null });
+		});
+
 		it('should return null if session not found', async () => {
 			const mockFrom = vi.fn().mockReturnValue({
 				innerJoin: vi.fn().mockReturnValue({
@@ -96,6 +131,27 @@ describe('auth', () => {
 
 			expect(result).toEqual({ session: null, user: null });
 			expect(db.delete).toHaveBeenCalledWith(table.session);
+		});
+
+		it('should handle db error during deletion of expired session', async () => {
+			const expiredSession = {
+				id: 'session-id',
+				userId: 'user-id',
+				expiresAt: new Date(Date.now() - 10000)
+			};
+			const user = { id: 'user-id', username: 'testuser' };
+
+			const mockWhere = vi.fn().mockResolvedValue([{ session: expiredSession, user }]);
+			const mockInnerJoin = vi.fn().mockReturnValue({ where: mockWhere });
+			const mockFrom = vi.fn().mockReturnValue({ innerJoin: mockInnerJoin });
+			vi.mocked(db.select).mockReturnValue({ from: mockFrom } as any);
+
+			const mockDeleteWhere = vi.fn().mockRejectedValue(new Error('DB Error'));
+			vi.mocked(db.delete).mockReturnValue({ where: mockDeleteWhere } as any);
+
+			const result = await auth.validateSessionToken('token');
+			// Should swallow error and return null
+			expect(result).toEqual({ session: null, user: null });
 		});
 
 		it('should return session and user if valid', async () => {
@@ -153,6 +209,13 @@ describe('auth', () => {
 
 			expect(db.delete).toHaveBeenCalledWith(table.session);
 			expect(mockWhere).toHaveBeenCalled();
+		});
+
+		it('should throw error if db delete fails', async () => {
+			const mockWhere = vi.fn().mockRejectedValue(new Error('DB Error'));
+			vi.mocked(db.delete).mockReturnValue({ where: mockWhere } as any);
+
+			await expect(auth.invalidateSession('session-id')).rejects.toThrow('DB Error');
 		});
 	});
 

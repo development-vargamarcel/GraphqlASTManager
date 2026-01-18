@@ -1,9 +1,17 @@
+/**
+ * A simple in-memory rate limiter using a sliding window algorithm (approximated).
+ * Note: This is not suitable for distributed systems.
+ */
 export class RateLimiter {
 	private readonly windowMs: number;
 	private readonly maxRequests: number;
 	private readonly hits: Map<string, { count: number; expiresAt: number }>;
 	private readonly cleanupInterval: ReturnType<typeof setInterval>;
 
+	/**
+	 * @param windowMs Time window in milliseconds.
+	 * @param maxRequests Maximum requests allowed within the window.
+	 */
 	constructor(windowMs: number, maxRequests: number) {
 		this.windowMs = windowMs;
 		this.maxRequests = maxRequests;
@@ -13,6 +21,12 @@ export class RateLimiter {
 		this.cleanupInterval = setInterval(() => this.cleanup(), 60 * 1000);
 	}
 
+	/**
+	 * Checks if a request is allowed for the given key (e.g., IP address).
+	 * Increments the counter if allowed.
+	 * @param key The unique identifier for the client.
+	 * @returns true if allowed, false if rate limit exceeded.
+	 */
 	check(key: string): boolean {
 		const now = Date.now();
 		const record = this.hits.get(key);

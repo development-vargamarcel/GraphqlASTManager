@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { setLocale } from '$lib/paraglide/runtime';
+	import { setLocale } from '$lib/paraglide/runtime.js';
 	import { m } from '$lib/paraglide/messages.js';
 
     let currentLocale = $state("en"); // This would ideally come from the runtime, but simplified for this view if needed.
@@ -11,7 +11,7 @@
         { code: 'es', label: 'Español' },
         { code: 'it', label: 'Italiano' },
         { code: 'ro', label: 'Română' }
-    ];
+    ] as const;
 </script>
 
 <div class="mx-auto max-w-2xl text-center">
