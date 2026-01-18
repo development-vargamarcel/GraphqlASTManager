@@ -1,4 +1,5 @@
 import type { RequestEvent } from '@sveltejs/kit';
+import { dev } from '$app/environment';
 import { eq } from 'drizzle-orm';
 import { sha256 } from '@oslojs/crypto/sha2';
 import { encodeBase64url, encodeHexLowerCase } from '@oslojs/encoding';
@@ -72,12 +73,18 @@ export async function invalidateSession(sessionId: string) {
 export function setSessionTokenCookie(event: RequestEvent, token: string, expiresAt: Date) {
 	event.cookies.set(SESSION_COOKIE_NAME, token, {
 		expires: expiresAt,
-		path: '/'
+		path: '/',
+		httpOnly: true,
+		sameSite: 'lax',
+		secure: !dev
 	});
 }
 
 export function deleteSessionTokenCookie(event: RequestEvent) {
 	event.cookies.delete(SESSION_COOKIE_NAME, {
-		path: '/'
+		path: '/',
+		httpOnly: true,
+		sameSite: 'lax',
+		secure: !dev
 	});
 }

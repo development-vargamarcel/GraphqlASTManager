@@ -5,7 +5,10 @@ import { eq } from 'drizzle-orm';
 import * as auth from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
+import { RateLimiter } from '$lib/server/rate-limiter';
 import type { Actions, PageServerLoad } from './$types';
+
+const limiter = new RateLimiter(60 * 1000, 5); // 5 requests per minute
 
 export const load: PageServerLoad = async (event) => {
 	if (event.locals.user) {
@@ -16,6 +19,10 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
 	login: async (event) => {
+		if (!limiter.check(event.getClientAddress())) {
+			return fail(429, { message: 'Too many requests. Please try again later.' });
+		}
+
 		const formData = await event.request.formData();
 		const username = formData.get('username');
 		const password = formData.get('password');
@@ -54,6 +61,10 @@ export const actions: Actions = {
 		return redirect(302, '/demo/lucia');
 	},
 	register: async (event) => {
+		if (!limiter.check(event.getClientAddress())) {
+			return fail(429, { message: 'Too many requests. Please try again later.' });
+		}
+
 		const formData = await event.request.formData();
 		const username = formData.get('username');
 		const password = formData.get('password');
