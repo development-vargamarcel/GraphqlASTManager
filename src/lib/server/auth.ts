@@ -5,9 +5,11 @@ import { encodeBase64url, encodeHexLowerCase } from '@oslojs/encoding';
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
 
-const DAY_IN_MS = 1000 * 60 * 60 * 24;
+export const DAY_IN_MS = 1000 * 60 * 60 * 24;
+export const SESSION_EXPIRATION_DAYS = 30;
+export const SESSION_RENEWAL_THRESHOLD_DAYS = 15;
 
-export const sessionCookieName = 'auth-session';
+export const SESSION_COOKIE_NAME = 'auth-session';
 
 export function generateSessionToken() {
 	const bytes = crypto.getRandomValues(new Uint8Array(18));
@@ -20,7 +22,7 @@ export async function createSession(token: string, userId: string) {
 	const session: table.Session = {
 		id: sessionId,
 		userId,
-		expiresAt: new Date(Date.now() + DAY_IN_MS * 30)
+		expiresAt: new Date(Date.now() + DAY_IN_MS * SESSION_EXPIRATION_DAYS)
 	};
 	await db.insert(table.session).values(session);
 	return session;
@@ -49,9 +51,9 @@ export async function validateSessionToken(token: string) {
 		return { session: null, user: null };
 	}
 
-	const renewSession = Date.now() >= session.expiresAt.getTime() - DAY_IN_MS * 15;
+	const renewSession = Date.now() >= session.expiresAt.getTime() - DAY_IN_MS * SESSION_RENEWAL_THRESHOLD_DAYS;
 	if (renewSession) {
-		session.expiresAt = new Date(Date.now() + DAY_IN_MS * 30);
+		session.expiresAt = new Date(Date.now() + DAY_IN_MS * SESSION_EXPIRATION_DAYS);
 		await db
 			.update(table.session)
 			.set({ expiresAt: session.expiresAt })
@@ -68,14 +70,14 @@ export async function invalidateSession(sessionId: string) {
 }
 
 export function setSessionTokenCookie(event: RequestEvent, token: string, expiresAt: Date) {
-	event.cookies.set(sessionCookieName, token, {
+	event.cookies.set(SESSION_COOKIE_NAME, token, {
 		expires: expiresAt,
 		path: '/'
 	});
 }
 
 export function deleteSessionTokenCookie(event: RequestEvent) {
-	event.cookies.delete(sessionCookieName, {
+	event.cookies.delete(SESSION_COOKIE_NAME, {
 		path: '/'
 	});
 }

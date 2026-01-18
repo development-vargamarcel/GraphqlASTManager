@@ -12,7 +12,7 @@ const handleParaglide: Handle = ({ event, resolve }) => paraglideMiddleware(even
 });
 
 const handleAuth: Handle = async ({ event, resolve }) => {
-	const sessionToken = event.cookies.get(auth.sessionCookieName);
+	const sessionToken = event.cookies.get(auth.SESSION_COOKIE_NAME);
 
 	if (!sessionToken) {
 		event.locals.user = null;
