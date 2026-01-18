@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import * as auth from './auth';
+import * as auth from './auth.js';
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
@@ -174,14 +174,20 @@ describe('auth', () => {
 			auth.setSessionTokenCookie(event, token, expiresAt);
 			expect(event.cookies.set).toHaveBeenCalledWith(auth.SESSION_COOKIE_NAME, token, {
 				expires: expiresAt,
-				path: '/'
+				path: '/',
+				httpOnly: true,
+				sameSite: 'lax',
+				secure: expect.any(Boolean)
 			});
 		});
 
 		it('deleteSessionTokenCookie should delete cookie', () => {
 			auth.deleteSessionTokenCookie(event);
 			expect(event.cookies.delete).toHaveBeenCalledWith(auth.SESSION_COOKIE_NAME, {
-				path: '/'
+				path: '/',
+				httpOnly: true,
+				sameSite: 'lax',
+				secure: expect.any(Boolean)
 			});
 		});
 	});

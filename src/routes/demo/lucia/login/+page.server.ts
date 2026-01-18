@@ -1,12 +1,9 @@
-import { hash, verify } from '@node-rs/argon2';
-import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { fail, redirect } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
 import * as auth from '$lib/server/auth';
-import { db } from '$lib/server/db';
-import * as table from '$lib/server/db/schema';
+import * as userModel from '$lib/server/user';
 import { RateLimiter } from '$lib/server/rate-limiter';
-import type { Actions, PageServerLoad } from './$types';
+import { validateUsername, validatePassword } from '$lib/server/validation';
+import type { Actions, PageServerLoad } from './$types.js';
 
 const limiter = new RateLimiter(60 * 1000, 5); // 5 requests per minute
 
@@ -34,22 +31,12 @@ export const actions: Actions = {
 			return fail(400, { message: 'Invalid password (min 6, max 255 characters)' });
 		}
 
-		const results = await db
-			.select()
-			.from(table.user)
-			.where(eq(table.user.username, username));
-
-		const existingUser = results.at(0);
+		const existingUser = await userModel.getUserByUsername(username);
 		if (!existingUser) {
 			return fail(400, { message: 'Incorrect username or password' });
 		}
 
-		const validPassword = await verify(existingUser.passwordHash, password, {
-			memoryCost: 19456,
-			timeCost: 2,
-			outputLen: 32,
-			parallelism: 1,
-		});
+		const validPassword = await auth.verifyPassword(existingUser.passwordHash, password);
 		if (!validPassword) {
 			return fail(400, { message: 'Incorrect username or password' });
 		}
@@ -76,17 +63,11 @@ export const actions: Actions = {
 			return fail(400, { message: 'Invalid password' });
 		}
 
-		const userId = generateUserId();
-		const passwordHash = await hash(password, {
-			// recommended minimum parameters
-			memoryCost: 19456,
-			timeCost: 2,
-			outputLen: 32,
-			parallelism: 1,
-		});
+		const userId = auth.generateUserId();
+		const passwordHash = await auth.hashPassword(password);
 
 		try {
-			await db.insert(table.user).values({ id: userId, username, passwordHash });
+			await userModel.createUser(userId, username, passwordHash);
 
 			const sessionToken = auth.generateSessionToken();
 			const session = await auth.createSession(sessionToken, userId);
@@ -100,27 +81,3 @@ export const actions: Actions = {
 		return redirect(302, '/demo/lucia');
 	},
 };
-
-function generateUserId() {
-	// ID with 120 bits of entropy, or about the same as UUID v4.
-	const bytes = crypto.getRandomValues(new Uint8Array(15));
-	const id = encodeBase32LowerCase(bytes);
-	return id;
-}
-
-function validateUsername(username: unknown): username is string {
-	return (
-		typeof username === 'string' &&
-		username.length >= 3 &&
-		username.length <= 31 &&
-		/^[a-z0-9_-]+$/.test(username)
-	);
-}
-
-function validatePassword(password: unknown): password is string {
-	return (
-		typeof password === 'string' &&
-		password.length >= 6 &&
-		password.length <= 255
-	);
-}
