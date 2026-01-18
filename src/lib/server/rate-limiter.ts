@@ -2,6 +2,7 @@ export class RateLimiter {
 	private readonly windowMs: number;
 	private readonly maxRequests: number;
 	private readonly hits: Map<string, { count: number; expiresAt: number }>;
+	private readonly cleanupInterval: ReturnType<typeof setInterval>;
 
 	constructor(windowMs: number, maxRequests: number) {
 		this.windowMs = windowMs;
@@ -9,7 +10,7 @@ export class RateLimiter {
 		this.hits = new Map();
 
 		// Clean up expired entries every minute
-		setInterval(() => this.cleanup(), 60 * 1000);
+		this.cleanupInterval = setInterval(() => this.cleanup(), 60 * 1000);
 	}
 
 	check(key: string): boolean {
@@ -36,6 +37,10 @@ export class RateLimiter {
 
 	reset(key: string) {
 		this.hits.delete(key);
+	}
+
+	destroy() {
+		clearInterval(this.cleanupInterval);
 	}
 
 	private cleanup() {
