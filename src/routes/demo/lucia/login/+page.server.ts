@@ -1,8 +1,8 @@
 import { fail, redirect } from '@sveltejs/kit';
-import * as auth from '$lib/server/auth';
-import * as userModel from '$lib/server/user';
-import { RateLimiter } from '$lib/server/rate-limiter';
-import { validateUsername, validatePassword } from '$lib/server/validation';
+import * as auth from '$lib/server/auth.js';
+import * as userModel from '$lib/server/user.js';
+import { RateLimiter } from '$lib/server/rate-limiter.js';
+import { validateUsername, validatePassword } from '$lib/server/validation.js';
 import type { Actions, PageServerLoad } from './$types.js';
 
 const limiter = new RateLimiter(60 * 1000, 5); // 5 requests per minute

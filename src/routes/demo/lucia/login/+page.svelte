@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { ActionData } from './$types';
+	import type { ActionData } from './$types.js';
 
 	let { form }: { form: ActionData } = $props();
 

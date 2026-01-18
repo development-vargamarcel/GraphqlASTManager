@@ -1,8 +1,11 @@
 import { sequence } from '@sveltejs/kit/hooks';
-import * as auth from '$lib/server/auth';
+import * as auth from '$lib/server/auth.js';
 import type { Handle } from '@sveltejs/kit';
-import { paraglideMiddleware } from '$lib/paraglide/server';
-import { RateLimiter } from '$lib/server/rate-limiter';
+import { paraglideMiddleware } from '$lib/paraglide/server.js';
+import { RateLimiter } from '$lib/server/rate-limiter.js';
+import { Logger } from '$lib/server/logger.js';
+
+const logger = new Logger('hooks');
 
 // Global rate limiter: 100 requests per minute per IP
 const globalLimiter = new RateLimiter(60 * 1000, 100);
@@ -15,10 +18,29 @@ const handleRateLimit: Handle = async ({ event, resolve }) => {
 
 	const clientIp = event.getClientAddress();
 	if (!globalLimiter.check(clientIp)) {
+		logger.warn('Rate limit exceeded', { ip: clientIp, path: event.url.pathname });
 		return new Response('Too many requests', { status: 429 });
 	}
 
 	return resolve(event);
+};
+
+const handleLogging: Handle = async ({ event, resolve }) => {
+	const start = Date.now();
+	const response = await resolve(event);
+	const duration = Date.now() - start;
+
+	if (!event.url.pathname.startsWith('/_app')) {
+		logger.info('Request processed', {
+			method: event.request.method,
+			path: event.url.pathname,
+			status: response.status,
+			duration,
+			ip: event.getClientAddress()
+		});
+	}
+
+	return response;
 };
 
 const handleSecurityHeaders: Handle = async ({ event, resolve }) => {
@@ -63,4 +85,4 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-export const handle: Handle = sequence(handleSecurityHeaders, handleRateLimit, handleParaglide, handleAuth);
+export const handle: Handle = sequence(handleLogging, handleSecurityHeaders, handleRateLimit, handleParaglide, handleAuth);

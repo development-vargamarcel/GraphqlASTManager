@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as user from './user.js';
-import { db } from '$lib/server/db';
-import * as table from '$lib/server/db/schema';
+import { db } from '$lib/server/db/index.js';
+import * as table from '$lib/server/db/schema.js';
 
 // Mock the DB module
-vi.mock('$lib/server/db', () => ({
+vi.mock('$lib/server/db/index.js', () => ({
 	db: {
 		insert: vi.fn(),
 		select: vi.fn(),
@@ -12,6 +12,18 @@ vi.mock('$lib/server/db', () => ({
 		update: vi.fn()
 	}
 }));
+
+vi.mock('$lib/server/logger.js', () => {
+	return {
+		Logger: class {
+			constructor(context: string) {}
+			info = vi.fn();
+			warn = vi.fn();
+			error = vi.fn();
+			debug = vi.fn();
+		}
+	};
+});
 
 describe('user', () => {
 	beforeEach(() => {
@@ -37,6 +49,14 @@ describe('user', () => {
 
 			const result = await user.getUserByUsername('test');
 			expect(result).toBeUndefined();
+		});
+
+		it('should throw error if db fails', async () => {
+			const mockWhere = vi.fn().mockRejectedValue(new Error('DB Error'));
+			const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+			vi.mocked(db.select).mockReturnValue({ from: mockFrom } as any);
+
+			await expect(user.getUserByUsername('test')).rejects.toThrow('DB Error');
 		});
 	});
 
@@ -64,6 +84,17 @@ describe('user', () => {
 				passwordHash,
 				age: null
 			});
+		});
+
+		it('should throw error if db fails', async () => {
+			const id = '123';
+			const username = 'testuser';
+			const passwordHash = 'hash';
+
+			const mockValues = vi.fn().mockRejectedValue(new Error('DB Error'));
+			vi.mocked(db.insert).mockReturnValue({ values: mockValues } as any);
+
+			await expect(user.createUser(id, username, passwordHash)).rejects.toThrow('DB Error');
 		});
 	});
 });

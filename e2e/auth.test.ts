@@ -37,7 +37,7 @@ test.describe('Authentication', () => {
 		await page.click('button:has-text("Register")');
 
 		// Verify error message
-		await expect(page.locator('p[style="color: red"]')).toHaveText('Username already taken');
+		await expect(page.locator('.text-red-600')).toContainText('Username already taken');
 	});
 
 	test('should show error when login with incorrect password', async ({ page }) => {
@@ -46,6 +46,6 @@ test.describe('Authentication', () => {
 		await page.fill('input[name="password"]', 'wrongpassword');
 		await page.click('button:has-text("Login")');
 
-		await expect(page.locator('p[style="color: red"]')).toHaveText('Incorrect username or password');
+		await expect(page.locator('.text-red-600')).toContainText('Incorrect username or password');
 	});
 });
