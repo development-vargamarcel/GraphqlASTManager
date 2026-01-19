@@ -4,7 +4,9 @@ import * as userModel from '$lib/server/user.js';
 import { RateLimiter } from '$lib/server/rate-limiter.js';
 import { validateUsername, validatePassword } from '$lib/server/validation.js';
 import type { Actions, PageServerLoad } from './$types.js';
+import { Logger } from '$lib/server/logger.js';
 
+const logger = new Logger('login-action');
 const limiter = new RateLimiter(60 * 1000, 5); // 5 requests per minute
 
 export const load: PageServerLoad = async (event) => {
@@ -14,9 +16,20 @@ export const load: PageServerLoad = async (event) => {
 	return {};
 };
 
+function validateAuthFormData(username: unknown, password: unknown) {
+	if (!validateUsername(username)) {
+		return { valid: false, message: 'Invalid username (3-31 chars, alphanumeric, -, _)' };
+	}
+	if (!validatePassword(password)) {
+		return { valid: false, message: 'Invalid password (6-255 chars)' };
+	}
+	return { valid: true };
+}
+
 export const actions: Actions = {
 	login: async (event) => {
-		if (!limiter.check(event.getClientAddress())) {
+		const clientIp = event.getClientAddress();
+		if (!limiter.check(clientIp)) {
 			return fail(429, { message: 'Too many requests. Please try again later.' });
 		}
 
@@ -24,20 +37,22 @@ export const actions: Actions = {
 		const username = formData.get('username');
 		const password = formData.get('password');
 
-		if (!validateUsername(username)) {
-			return fail(400, { message: 'Invalid username (3-31 chars, alphanumeric, -, _)' });
-		}
-		if (!validatePassword(password)) {
-			return fail(400, { message: 'Invalid password (6-255 chars)' });
+		const validation = validateAuthFormData(username, password);
+		if (!validation.valid) {
+			return fail(400, { message: validation.message });
 		}
 
-		const existingUser = await userModel.getUserByUsername(username);
+		// TypeScript needs assurance that username and password are strings after validation
+		const validUsername = username as string;
+		const validPassword = password as string;
+
+		const existingUser = await userModel.getUserByUsername(validUsername);
 		if (!existingUser) {
 			return fail(400, { message: 'Incorrect username or password' });
 		}
 
-		const validPassword = await auth.verifyPassword(existingUser.passwordHash, password);
-		if (!validPassword) {
+		const validPasswordHash = await auth.verifyPassword(existingUser.passwordHash, validPassword);
+		if (!validPasswordHash) {
 			return fail(400, { message: 'Incorrect username or password' });
 		}
 
@@ -45,10 +60,13 @@ export const actions: Actions = {
 		const session = await auth.createSession(sessionToken, existingUser.id);
 		auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
 
+		logger.info('User logged in', { userId: existingUser.id, username: existingUser.username, ip: clientIp });
+
 		return redirect(302, '/demo/lucia');
 	},
 	register: async (event) => {
-		if (!limiter.check(event.getClientAddress())) {
+		const clientIp = event.getClientAddress();
+		if (!limiter.check(clientIp)) {
 			return fail(429, { message: 'Too many requests. Please try again later.' });
 		}
 
@@ -56,26 +74,30 @@ export const actions: Actions = {
 		const username = formData.get('username');
 		const password = formData.get('password');
 
-		if (!validateUsername(username)) {
-			return fail(400, { message: 'Invalid username (3-31 chars, alphanumeric, -, _)' });
+		const validation = validateAuthFormData(username, password);
+		if (!validation.valid) {
+			return fail(400, { message: validation.message });
 		}
-		if (!validatePassword(password)) {
-			return fail(400, { message: 'Invalid password (6-255 chars)' });
-		}
+
+		const validUsername = username as string;
+		const validPassword = password as string;
 
 		const userId = auth.generateUserId();
-		const passwordHash = await auth.hashPassword(password);
+		const passwordHash = await auth.hashPassword(validPassword);
 
 		try {
-			await userModel.createUser(userId, username, passwordHash);
+			await userModel.createUser(userId, validUsername, passwordHash);
 
 			const sessionToken = auth.generateSessionToken();
 			const session = await auth.createSession(sessionToken, userId);
 			auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
+
+			logger.info('User registered', { userId, username: validUsername, ip: clientIp });
 		} catch (e: any) {
 			if (e.code === 'SQLITE_CONSTRAINT_UNIQUE') {
 				return fail(400, { message: 'Username already taken' });
 			}
+			logger.error('Registration failed', e, { username: validUsername, ip: clientIp });
 			return fail(500, { message: 'An error has occurred' });
 		}
 		return redirect(302, '/demo/lucia');

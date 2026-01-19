@@ -1,3 +1,13 @@
+/**
+ * Validates if the input is a valid username.
+ * Criteria:
+ * - Must be a string
+ * - Length between 3 and 31 characters
+ * - Contains only alphanumeric characters, underscores, and hyphens
+ *
+ * @param username - The input to validate
+ * @returns True if valid, false otherwise
+ */
 export function validateUsername(username: unknown): username is string {
 	return (
 		typeof username === 'string' &&
@@ -7,6 +17,15 @@ export function validateUsername(username: unknown): username is string {
 	);
 }
 
+/**
+ * Validates if the input is a valid password.
+ * Criteria:
+ * - Must be a string
+ * - Length between 6 and 255 characters
+ *
+ * @param password - The input to validate
+ * @returns True if valid, false otherwise
+ */
 export function validatePassword(password: unknown): password is string {
 	return (
 		typeof password === 'string' &&

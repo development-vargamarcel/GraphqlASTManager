@@ -71,51 +71,45 @@ export async function createSession(token: string, userId: string) {
  */
 export async function validateSessionToken(token: string) {
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-	let result;
+
 	try {
-		[result] = await db
+		const [result] = await db
 			.select({
-				// Adjust user table here to tweak returned data
 				user: { id: table.user.id, username: table.user.username },
 				session: table.session
 			})
 			.from(table.session)
 			.innerJoin(table.user, eq(table.session.userId, table.user.id))
 			.where(eq(table.session.id, sessionId));
-	} catch (error) {
-		logger.error('Failed to validate session token', error);
-		return { session: null, user: null };
-	}
 
-	if (!result) {
-		return { session: null, user: null };
-	}
-	const { session, user } = result;
-
-	const sessionExpired = Date.now() >= session.expiresAt.getTime();
-	if (sessionExpired) {
-		try {
-			await db.delete(table.session).where(eq(table.session.id, session.id));
-		} catch (error) {
-			logger.error('Failed to delete expired session', error, { sessionId: session.id });
+		if (!result) {
+			return { session: null, user: null };
 		}
-		return { session: null, user: null };
-	}
 
-	const renewSession = Date.now() >= session.expiresAt.getTime() - DAY_IN_MS * SESSION_RENEWAL_THRESHOLD_DAYS;
-	if (renewSession) {
-		session.expiresAt = new Date(Date.now() + DAY_IN_MS * SESSION_EXPIRATION_DAYS);
-		try {
+		const { session, user } = result;
+		const now = Date.now();
+
+		if (now >= session.expiresAt.getTime()) {
+			await db.delete(table.session).where(eq(table.session.id, session.id));
+			return { session: null, user: null };
+		}
+
+		// Sliding window: renew if halfway through expiration
+		if (now >= session.expiresAt.getTime() - DAY_IN_MS * SESSION_RENEWAL_THRESHOLD_DAYS) {
+			session.expiresAt = new Date(now + DAY_IN_MS * SESSION_EXPIRATION_DAYS);
 			await db
 				.update(table.session)
 				.set({ expiresAt: session.expiresAt })
 				.where(eq(table.session.id, session.id));
-		} catch (error) {
-			logger.error('Failed to renew session', error, { sessionId: session.id });
 		}
-	}
 
-	return { session, user };
+		return { session, user };
+
+	} catch (error) {
+		logger.error('Failed to validate session token', error);
+		// In case of error (e.g. db connection), we return nulls to fail safe
+		return { session: null, user: null };
+	}
 }
 
 export type SessionValidationResult = Awaited<ReturnType<typeof validateSessionToken>>;
