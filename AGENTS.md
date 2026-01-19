@@ -2,20 +2,20 @@
 
 ## Overview
 
-This project is a SvelteKit application using Drizzle ORM, Lucia (implemented manually via `auth.ts`), and Paraglide for localization.
+This project is a SvelteKit application using Drizzle ORM, custom authentication logic, and Paraglide for localization. It follows a clean architecture with clear separation of concerns between client and server.
 
 ## Architecture
 
--   **Frontend**: SvelteKit with Tailwind CSS.
+-   **Frontend**: SvelteKit (Svelte 5) with Tailwind CSS v4.
 -   **Backend**: SvelteKit Server Actions and Load functions.
 -   **Database**: SQLite via Better-SQLite3 and Drizzle ORM.
--   **Auth**: Custom session-based authentication using Argon2 for password hashing.
-    -   Session tokens are stored in cookies (`auth-session`).
-    -   Sessions slide (renew) automatically if active.
--   **Logging**: Custom `Logger` utility in `src/lib/server/logger.ts`.
--   **User Management**:
-    -   Usernames are case-insensitive (stored as lowercase).
-    -   Validation allows alphanumeric, hyphens, and underscores.
+-   **Auth**: Custom session-based authentication using:
+    -   `@node-rs/argon2` for password hashing.
+    -   `@oslojs/crypto` & `@oslojs/encoding` for token generation.
+    -   Session tokens are stored in `httpOnly` cookies (`auth-session`).
+    -   Sliding window sessions (renew automatically if active and within renewal threshold).
+-   **Logging**: Structured JSON logging via `src/lib/server/logger.ts`.
+-   **Validation**: Centralized validation in `src/lib/server/validation.ts`.
 
 ## Database Schema
 
@@ -26,35 +26,68 @@ This project is a SvelteKit application using Drizzle ORM, Lucia (implemented ma
 
 ### Authentication
 
-1.  User submits login form.
-2.  Input validation (username/password).
-3.  Username is normalized to lowercase.
-4.  Server verifies password hash against stored hash.
-5.  `createSession` is called to generate a token and store session in DB.
-6.  Cookie is set via `setSessionTokenCookie`.
+1.  **Login/Register**:
+    -   User submits form.
+    -   Rate limiter checks IP (5 req/min).
+    -   Input validation (length, allowed chars).
+    -   **Register**:
+        -   Username is normalized to lowercase.
+        -   User created in DB. Unique constraint handled.
+        -   Session created & cookie set.
+    -   **Login**:
+        -   Username lookup (lowercase).
+        -   Password verification (Argon2).
+        -   Session created & cookie set.
+
+2.  **Session Management**:
+    -   `hooks.server.ts` validates session on every request.
+    -   Expired sessions are deleted.
+    -   Sessions nearing expiration (halfway through validity) are automatically renewed (expiry extended).
 
 ### Rate Limiting
 
--   **Global**: Applied in `src/hooks.server.ts` (100 req/min per IP).
--   **Login/Register**: Stricter limit applied in route actions (5 req/min per IP).
+-   **Global**: Applied in `src/hooks.server.ts` (100 req/min per IP) to protect the app.
+-   **Auth Routes**: Stricter limit (5 req/min per IP) in login/register actions to prevent brute-force attacks.
 
 ## Setup Instructions
 
-1.  Install dependencies: `npm install`
-2.  Set up environment variables: Copy `.env.example` to `.env`.
-    -   Ensure `DATABASE_URL` is set (e.g., `local.db`).
-3.  Generate database: `npm run db:generate`
-4.  Migrate database: `npm run db:migrate`
-5.  Start dev server: `npm run dev`
+1.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
+
+2.  **Environment Setup**:
+    -   Copy `.env.example` to `.env`.
+    -   Set `DATABASE_URL` (e.g., `local.db`).
+
+3.  **Database Initialization**:
+    ```bash
+    npm run db:generate
+    npm run db:migrate
+    ```
+
+4.  **Development**:
+    ```bash
+    npm run dev
+    ```
 
 ## Testing
 
--   Unit tests: `npm run test:unit` (or `npm run test:unit -- src/lib/server/` for server-only).
--   E2E tests: `npm run test:e2e` (requires Playwright browsers: `npx playwright install`).
+-   **Unit Tests**:
+    ```bash
+    npm run test:unit
+    ```
+    To test server logic only: `npm run test:unit -- src/lib/server/`
+
+-   **End-to-End Tests**:
+    ```bash
+    npx playwright install # First time only
+    npm run test:e2e
+    ```
 
 ## Conventions
 
--   Use `Logger` for server-side logging.
--   Wrap DB operations in try-catch blocks.
--   Use `check` script before committing.
--   Usernames are always processed as lowercase in backend logic.
+-   **Logging**: Use `Logger` class. Log errors with full context (params, error object).
+-   **Error Handling**: Return user-friendly error messages in actions. Log technical details.
+-   **Database**: Usernames are always stored and queried in lowercase.
+-   **Security**: `hooks.server.ts` handles Security Headers (CSP, X-Frame-Options, etc.).
