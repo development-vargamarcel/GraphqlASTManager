@@ -16,7 +16,7 @@ export const SESSION_RENEWAL_THRESHOLD_DAYS = 15;
 
 export const SESSION_COOKIE_NAME = 'auth-session';
 
-const SESSION_COOKIE_OPTIONS = {
+export const SESSION_COOKIE_OPTIONS = {
 	path: '/',
 	httpOnly: true,
 	sameSite: 'lax',
