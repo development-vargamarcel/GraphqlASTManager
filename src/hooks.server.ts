@@ -10,14 +10,18 @@ const logger = new Logger('hooks');
 // Global rate limiter: 100 requests per minute per IP
 const globalLimiter = new RateLimiter(60 * 1000, 100);
 
+function isStaticAsset(pathname: string): boolean {
+	return (
+		pathname.startsWith('/_app') ||
+		pathname === '/favicon.ico' ||
+		pathname === '/favicon.svg' ||
+		pathname === '/robots.txt'
+	);
+}
+
 const handleRateLimit: Handle = async ({ event, resolve }) => {
 	// Skip rate limiting for static assets (managed by adapter usually, but good to be safe)
-	if (
-		event.url.pathname.startsWith('/_app') ||
-		event.url.pathname === '/favicon.ico' ||
-		event.url.pathname === '/favicon.svg' ||
-		event.url.pathname === '/robots.txt'
-	) {
+	if (isStaticAsset(event.url.pathname)) {
 		return resolve(event);
 	}
 
@@ -35,12 +39,7 @@ const handleLogging: Handle = async ({ event, resolve }) => {
 	const response = await resolve(event);
 	const duration = Date.now() - start;
 
-	if (
-		!event.url.pathname.startsWith('/_app') &&
-		event.url.pathname !== '/favicon.ico' &&
-		event.url.pathname !== '/favicon.svg' &&
-		event.url.pathname !== '/robots.txt'
-	) {
+	if (!isStaticAsset(event.url.pathname)) {
 		logger.info('Request processed', {
 			method: event.request.method,
 			path: event.url.pathname,
@@ -61,6 +60,10 @@ const handleSecurityHeaders: Handle = async ({ event, resolve }) => {
 	response.headers.set('X-Frame-Options', 'DENY');
 	response.headers.set('X-XSS-Protection', '1; mode=block');
 	response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+	response.headers.set(
+		'Content-Security-Policy',
+		"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; frame-ancestors 'none';"
+	);
 
 	return response;
 };
