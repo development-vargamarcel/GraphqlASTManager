@@ -12,7 +12,12 @@ const globalLimiter = new RateLimiter(60 * 1000, 100);
 
 const handleRateLimit: Handle = async ({ event, resolve }) => {
 	// Skip rate limiting for static assets (managed by adapter usually, but good to be safe)
-	if (event.url.pathname.startsWith('/_app') || event.url.pathname.startsWith('/favicon.ico')) {
+	if (
+		event.url.pathname.startsWith('/_app') ||
+		event.url.pathname === '/favicon.ico' ||
+		event.url.pathname === '/favicon.svg' ||
+		event.url.pathname === '/robots.txt'
+	) {
 		return resolve(event);
 	}
 
@@ -30,7 +35,12 @@ const handleLogging: Handle = async ({ event, resolve }) => {
 	const response = await resolve(event);
 	const duration = Date.now() - start;
 
-	if (!event.url.pathname.startsWith('/_app')) {
+	if (
+		!event.url.pathname.startsWith('/_app') &&
+		event.url.pathname !== '/favicon.ico' &&
+		event.url.pathname !== '/favicon.svg' &&
+		event.url.pathname !== '/robots.txt'
+	) {
 		logger.info('Request processed', {
 			method: event.request.method,
 			path: event.url.pathname,
