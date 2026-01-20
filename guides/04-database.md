@@ -38,6 +38,16 @@ We use **Drizzle Kit** to manage schema changes.
     ```
     This applies the changes to your local database file.
 
+## Seeding
+
+To populate the database with initial test data (e.g., a demo user):
+
+```bash
+npm run db:seed
+```
+
+This will create a user with username `demo` and password `password123`.
+
 ## Accessing Database
 
 Use the exported `db` instance from `src/lib/server/db/index.ts`.

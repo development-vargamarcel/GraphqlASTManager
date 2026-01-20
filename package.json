@@ -17,6 +17,7 @@
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx src/lib/server/db/seed.ts",
     "db:studio": "drizzle-kit studio",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
@@ -64,6 +65,7 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
     "@vitest/browser": "^3.2.4",
+    "dotenv": "^17.2.3",
     "drizzle-kit": "^0.31.4",
     "drizzle-orm": "^0.44.5",
     "eslint": "^9.36.0",
@@ -81,6 +83,7 @@
     "svelte": "^5.39.5",
     "svelte-check": "^4.3.2",
     "tailwindcss": "^4.1.13",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.44.1",
     "vite": "^7.1.7",
