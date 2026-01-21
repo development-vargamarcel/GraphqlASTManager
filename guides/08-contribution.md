@@ -6,24 +6,25 @@ We welcome contributions to improve the project. Please follow these guidelines 
 
 ## Code Style
 
--   **TypeScript**: Use strict typing. Avoid `any`.
--   **Svelte 5**: Use Runes (`$state`, `$derived`, `$effect`) instead of legacy stores where possible.
--   **Formatting**: We use Prettier. Run `npm run format` before committing.
--   **Linting**: We use ESLint. Run `npm run lint` to check for issues.
+- **TypeScript**: Use strict typing. Avoid `any`.
+- **Svelte 5**: Use Runes (`$state`, `$derived`, `$effect`) instead of legacy stores where possible.
+- **Formatting**: We use Prettier. Run `npm run format` before committing.
+- **Linting**: We use ESLint. Run `npm run lint` to check for issues.
 
 ## Branching Strategy
 
--   **Main Branch**: `main` (or `master`) contains the stable code.
--   **Feature Branches**: Create branches from `main` for new features or fixes.
-    -   Naming convention: `feature/your-feature-name` or `fix/your-fix-name`.
+- **Main Branch**: `main` (or `master`) contains the stable code.
+- **Feature Branches**: Create branches from `main` for new features or fixes.
+  - Naming convention: `feature/your-feature-name` or `fix/your-fix-name`.
 
 ## Commit Messages
 
 Use conventional commits:
--   `feat: add user profile page`
--   `fix: resolve login error`
--   `docs: update readme`
--   `chore: update dependencies`
+
+- `feat: add user profile page`
+- `fix: resolve login error`
+- `docs: update readme`
+- `chore: update dependencies`
 
 ## Pull Request Process
 
@@ -38,16 +39,17 @@ Use conventional commits:
 
 1.  **Start Dev Server**: `npm run dev`
 2.  **Database Changes**:
-    -   Modify `schema.ts`.
-    -   `npm run db:generate`
-    -   `npm run db:migrate`
+    - Modify `schema.ts`.
+    - `npm run db:generate`
+    - `npm run db:migrate`
 3.  **Localization**:
-    -   Add keys to `messages/en.json`.
-    -   Paraglide will auto-generate types.
+    - Add keys to `messages/en.json`.
+    - Paraglide will auto-generate types.
 
 ## Reporting Issues
 
 If you find a bug, please open an issue with:
--   Steps to reproduce.
--   Expected vs actual behavior.
--   Screenshots (if applicable).
+
+- Steps to reproduce.
+- Expected vs actual behavior.
+- Screenshots (if applicable).

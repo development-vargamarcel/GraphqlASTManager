@@ -187,7 +187,9 @@ describe('auth', () => {
 			const mockFrom = vi.fn().mockReturnValue({ innerJoin: mockInnerJoin });
 			vi.mocked(db.select).mockReturnValue({ from: mockFrom } as any);
 
-			const mockUpdateSet = vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) });
+			const mockUpdateSet = vi
+				.fn()
+				.mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) });
 			vi.mocked(db.update).mockReturnValue({ set: mockUpdateSet } as any);
 
 			const result = await auth.validateSessionToken('token');

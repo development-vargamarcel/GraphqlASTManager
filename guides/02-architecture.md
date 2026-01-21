@@ -4,11 +4,11 @@
 
 This project is a full-stack web application built with:
 
--   **SvelteKit**: The meta-framework for Svelte, handling routing, server-side rendering (SSR), and API endpoints.
--   **Svelte 5**: Utilizing the latest "Runes" reactivity model.
--   **Drizzle ORM**: For type-safe database interactions.
--   **Tailwind CSS v4**: For utility-first styling.
--   **Paraglide JS**: For internationalization (i18n).
+- **SvelteKit**: The meta-framework for Svelte, handling routing, server-side rendering (SSR), and API endpoints.
+- **Svelte 5**: Utilizing the latest "Runes" reactivity model.
+- **Drizzle ORM**: For type-safe database interactions.
+- **Tailwind CSS v4**: For utility-first styling.
+- **Paraglide JS**: For internationalization (i18n).
 
 ## Directory Structure
 
@@ -30,11 +30,11 @@ src/
 
 ### Server Logic (`src/lib/server`)
 
--   **`auth.ts`**: Handles session creation, validation, and password hashing.
--   **`db/`**: Contains database configuration and schema definitions.
--   **`logger.ts`**: A structured logger for consistent server-side logging.
--   **`rate-limiter.ts`**: In-memory rate limiting utility.
--   **`validation.ts`**: Input validation helpers.
+- **`auth.ts`**: Handles session creation, validation, and password hashing.
+- **`db/`**: Contains database configuration and schema definitions.
+- **`logger.ts`**: A structured logger for consistent server-side logging.
+- **`rate-limiter.ts`**: In-memory rate limiting utility.
+- **`validation.ts`**: Input validation helpers.
 
 ### Hooks (`src/hooks.server.ts`)
 

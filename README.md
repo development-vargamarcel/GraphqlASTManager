@@ -4,21 +4,23 @@ This is a SvelteKit application featuring custom authentication, SQLite database
 
 ## Features
 
--   **SvelteKit**: Full-stack framework.
--   **Drizzle ORM**: Type-safe database interaction with SQLite.
--   **Authentication**: Custom session-based auth with Argon2 hashing.
--   **Localization**: Paraglide JS.
--   **Tailwind CSS**: Utility-first styling.
+- **SvelteKit**: Full-stack framework.
+- **Drizzle ORM**: Type-safe database interaction with SQLite.
+- **Authentication**: Custom session-based auth with Argon2 hashing.
+- **Localization**: Paraglide JS.
+- **Tailwind CSS**: Utility-first styling.
 
 ## Getting Started
 
 1.  **Install Dependencies**:
+
     ```bash
     npm install
     ```
 
 2.  **Database Setup**:
     Copy `.env.example` to `.env` and configure `DATABASE_URL`.
+
     ```bash
     npm run db:generate
     npm run db:migrate
@@ -31,8 +33,8 @@ This is a SvelteKit application featuring custom authentication, SQLite database
 
 ## Testing
 
--   **Unit Tests**: `npm run test:unit`
--   **E2E Tests**: `npm run test:e2e`
+- **Unit Tests**: `npm run test:unit`
+- **E2E Tests**: `npm run test:e2e`
 
 ## Documentation
 

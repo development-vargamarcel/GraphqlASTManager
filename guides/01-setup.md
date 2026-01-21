@@ -2,18 +2,20 @@
 
 ## Prerequisites
 
--   Node.js (v20 or later)
--   npm (v10 or later)
+- Node.js (v20 or later)
+- npm (v10 or later)
 
 ## Installation
 
 1.  **Clone the repository**:
+
     ```bash
     git clone <repository-url>
     cd <repository-directory>
     ```
 
 2.  **Install dependencies**:
+
     ```bash
     npm install
     ```
@@ -33,6 +35,7 @@
 Before running the app, you need to set up the database schema.
 
 1.  **Generate migrations**:
+
     ```bash
     npm run db:generate
     ```

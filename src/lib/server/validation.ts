@@ -27,9 +27,5 @@ export function validateUsername(username: unknown): username is string {
  * @returns True if valid, false otherwise
  */
 export function validatePassword(password: unknown): password is string {
-	return (
-		typeof password === 'string' &&
-		password.length >= 6 &&
-		password.length <= 255
-	);
+	return typeof password === 'string' && password.length >= 6 && password.length <= 255;
 }

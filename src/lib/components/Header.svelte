@@ -28,7 +28,7 @@
 			</nav>
 		</div>
 		<div class="flex items-center space-x-4">
-            <!-- Placeholder for user profile or extra actions -->
+			<!-- Placeholder for user profile or extra actions -->
 		</div>
 	</div>
 </header>

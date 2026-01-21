@@ -9,7 +9,10 @@ const logger = new Logger('user');
 export async function getUserByUsername(username: string): Promise<User | undefined> {
 	try {
 		const normalizedUsername = username.toLowerCase();
-		const results = await db.select().from(table.user).where(eq(table.user.username, normalizedUsername));
+		const results = await db
+			.select()
+			.from(table.user)
+			.where(eq(table.user.username, normalizedUsername));
 		return results.at(0);
 	} catch (error) {
 		logger.error('Failed to get user by username', error, { username });
@@ -17,7 +20,11 @@ export async function getUserByUsername(username: string): Promise<User | undefi
 	}
 }
 
-export async function createUser(id: string, username: string, passwordHash: string): Promise<User> {
+export async function createUser(
+	id: string,
+	username: string,
+	passwordHash: string
+): Promise<User> {
 	const normalizedUsername = username.toLowerCase();
 	const user: User = {
 		id,
