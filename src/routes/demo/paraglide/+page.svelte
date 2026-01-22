@@ -2,9 +2,6 @@
 	import { setLocale } from '$lib/paraglide/runtime.js';
 	import { m } from '$lib/paraglide/messages.js';
 
-	let currentLocale = $state('en'); // This would ideally come from the runtime, but simplified for this view if needed.
-	// In a real app we might subscribe to language tag changes.
-
 	// A helper to make the buttons clearer
 	const locales = [
 		{ code: 'en', label: 'English' },

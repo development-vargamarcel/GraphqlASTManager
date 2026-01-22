@@ -1,8 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as auth from './auth.js';
 import { db } from '$lib/server/db/index.js';
 import * as table from '$lib/server/db/schema.js';
-import { eq } from 'drizzle-orm';
 import type { RequestEvent } from '@sveltejs/kit';
 
 // Mock the DB module
@@ -18,7 +17,7 @@ vi.mock('$lib/server/db/index.js', () => ({
 vi.mock('$lib/server/logger.js', () => {
 	return {
 		Logger: class {
-			constructor(context: string) {}
+			constructor() {}
 			info = vi.fn();
 			warn = vi.fn();
 			error = vi.fn();

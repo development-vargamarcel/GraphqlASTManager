@@ -44,6 +44,7 @@
 			<div class="-space-y-px rounded-md shadow-sm">
 				<div class="mb-4">
 					<label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+					<!-- svelte-ignore a11y_autofocus -->
 					<input
 						id="username"
 						name="username"
