@@ -47,6 +47,7 @@
 					<input
 						id="username"
 						name="username"
+						autocomplete="username"
 						required
 						autofocus
 						minlength="3"
@@ -54,12 +55,15 @@
 						pattern="[a-zA-Z0-9_-]+"
 						title="Username must be 3-31 characters long and can only contain letters, numbers, underscores, and hyphens."
 						aria-invalid={!!form?.errors?.username}
-						aria-describedby={form?.errors?.username ? 'username-error' : undefined}
+						aria-describedby="username-helper {form?.errors?.username ? 'username-error' : ''}"
 						class="mt-1 block w-full appearance-none rounded-md border px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm {form
 							?.errors?.username
 							? 'border-red-500 focus:border-red-500 focus:ring-red-500'
 							: 'border-gray-300'}"
 					/>
+					<p id="username-helper" class="mt-1 text-xs text-gray-500">
+						3-31 characters, alphanumeric, -, _
+					</p>
 					{#if form?.errors?.username}
 						<p id="username-error" class="mt-1 text-sm text-red-600">{form.errors.username}</p>
 					{/if}
@@ -71,11 +75,12 @@
 							id="password"
 							type={showPassword ? 'text' : 'password'}
 							name="password"
+							autocomplete="current-password"
 							required
 							minlength="6"
 							maxlength="255"
 							aria-invalid={!!form?.errors?.password}
-							aria-describedby={form?.errors?.password ? 'password-error' : undefined}
+							aria-describedby="password-helper {form?.errors?.password ? 'password-error' : ''}"
 							class="block w-full appearance-none rounded-md border px-3 py-2 pr-10 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm {form
 								?.errors?.password
 								? 'border-red-500 focus:border-red-500 focus:ring-red-500'
@@ -127,6 +132,7 @@
 							{/if}
 						</button>
 					</div>
+					<p id="password-helper" class="mt-1 text-xs text-gray-500">Min. 6 characters</p>
 					{#if form?.errors?.password}
 						<p id="password-error" class="mt-1 text-sm text-red-600">{form.errors.password}</p>
 					{/if}

@@ -10,7 +10,7 @@ export interface Toast {
 class ToastState {
 	toasts = $state<Toast[]>([]);
 
-	add(message: string, type: ToastType = 'info', duration = 3000) {
+	add(message: string, type: ToastType = 'info', duration = 5000) {
 		const id = crypto.randomUUID();
 		const toast: Toast = { id, message, type, duration };
 		this.toasts.push(toast);
