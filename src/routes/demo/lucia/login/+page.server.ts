@@ -17,13 +17,14 @@ export const load: PageServerLoad = async (event) => {
 };
 
 function validateAuthFormData(username: unknown, password: unknown) {
+	const errors: Record<string, string> = {};
 	if (!validateUsername(username)) {
-		return { valid: false, message: 'Invalid username (3-31 chars, alphanumeric, -, _)' };
+		errors.username = 'Invalid username (3-31 chars, alphanumeric, -, _)';
 	}
 	if (!validatePassword(password)) {
-		return { valid: false, message: 'Invalid password (6-255 chars)' };
+		errors.password = 'Invalid password (6-255 chars)';
 	}
-	return { valid: true };
+	return { valid: Object.keys(errors).length === 0, errors };
 }
 
 export const actions: Actions = {
@@ -39,7 +40,7 @@ export const actions: Actions = {
 
 		const validation = validateAuthFormData(username, password);
 		if (!validation.valid) {
-			return fail(400, { message: validation.message });
+			return fail(400, { errors: validation.errors });
 		}
 
 		// TypeScript needs assurance that username and password are strings after validation
@@ -80,7 +81,7 @@ export const actions: Actions = {
 
 		const validation = validateAuthFormData(username, password);
 		if (!validation.valid) {
-			return fail(400, { message: validation.message });
+			return fail(400, { errors: validation.errors });
 		}
 
 		const validUsername = username as string;
@@ -99,7 +100,10 @@ export const actions: Actions = {
 			logger.info('User registered', { userId, username: validUsername, ip: clientIp });
 		} catch (e: any) {
 			if (e.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-				return fail(400, { message: 'Username already taken' });
+				return fail(400, {
+					message: 'Username already taken',
+					errors: { username: 'Username already taken' }
+				});
 			}
 			logger.error('Registration failed', e, { username: validUsername, ip: clientIp });
 			return fail(500, { message: 'An error has occurred' });

@@ -51,10 +51,18 @@
 						autofocus
 						minlength="3"
 						maxlength="31"
-						pattern="[a-z0-9_-]+"
-						title="Username must be 3-31 characters long and can only contain lowercase letters, numbers, underscores, and hyphens."
-						class="mt-1 block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm"
+						pattern="[a-zA-Z0-9_-]+"
+						title="Username must be 3-31 characters long and can only contain letters, numbers, underscores, and hyphens."
+						aria-invalid={!!form?.errors?.username}
+						aria-describedby={form?.errors?.username ? 'username-error' : undefined}
+						class="mt-1 block w-full appearance-none rounded-md border px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm {form
+							?.errors?.username
+							? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+							: 'border-gray-300'}"
 					/>
+					{#if form?.errors?.username}
+						<p id="username-error" class="mt-1 text-sm text-red-600">{form.errors.username}</p>
+					{/if}
 				</div>
 				<div class="relative mb-4">
 					<label for="password" class="block text-sm font-medium text-gray-700">Password</label>
@@ -66,7 +74,12 @@
 							required
 							minlength="6"
 							maxlength="255"
-							class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 pr-10 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm"
+							aria-invalid={!!form?.errors?.password}
+							aria-describedby={form?.errors?.password ? 'password-error' : undefined}
+							class="block w-full appearance-none rounded-md border px-3 py-2 pr-10 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm {form
+								?.errors?.password
+								? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+								: 'border-gray-300'}"
 						/>
 						<button
 							type="button"
@@ -114,6 +127,9 @@
 							{/if}
 						</button>
 					</div>
+					{#if form?.errors?.password}
+						<p id="password-error" class="mt-1 text-sm text-red-600">{form.errors.password}</p>
+					{/if}
 				</div>
 			</div>
 

@@ -37,7 +37,7 @@ test.describe('Authentication', () => {
 		await page.click('button:has-text("Register")');
 
 		// Verify error message
-		await expect(page.locator('.text-red-600')).toContainText('Username already taken');
+		await expect(page.locator('#username-error')).toContainText('Username already taken');
 	});
 
 	test('should show error when login with incorrect password', async ({ page }) => {
