@@ -9,10 +9,12 @@
 </script>
 
 <div class="flex min-h-[calc(100vh-12rem)] items-center justify-center">
-	<div class="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow">
+	<div class="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow dark:bg-gray-800">
 		<div class="text-center">
-			<h1 class="text-3xl font-extrabold text-gray-900">Hi, {data.user.username}!</h1>
-			<p class="mt-2 text-sm text-gray-500">Your user ID is {data.user.id}</p>
+			<h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">
+				Hi, {data.user.username}!
+			</h1>
+			<p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Your user ID is {data.user.id}</p>
 		</div>
 
 		<form

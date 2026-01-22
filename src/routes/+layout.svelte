@@ -11,7 +11,7 @@
 <LoadingBar />
 <Toast />
 
-<div class="flex min-h-screen flex-col bg-gray-50">
+<div class="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900 dark:text-gray-100">
 	<Header />
 	<main class="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
 		{@render children()}

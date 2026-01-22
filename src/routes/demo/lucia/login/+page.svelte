@@ -7,16 +7,31 @@
 
 	let loadingAction = $state<string | null>(null);
 	let showPassword = $state(false);
+	let password = $state('');
+
+	let strength = $derived.by(() => {
+		let score = 0;
+		if (password.length > 5) score++;
+		if (password.length > 10) score++;
+		if (/[A-Z]/.test(password)) score++;
+		if (/[0-9]/.test(password)) score++;
+		if (/[^A-Za-z0-9]/.test(password)) score++;
+		return Math.min(score, 4);
+	});
 
 	function togglePassword() {
 		showPassword = !showPassword;
 	}
 </script>
 
-<div class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-	<div class="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow">
+<div
+	class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900"
+>
+	<div class="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow dark:bg-gray-800">
 		<div>
-			<h1 class="text-center text-3xl font-extrabold text-gray-900">Login / Register</h1>
+			<h1 class="text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+				Login / Register
+			</h1>
 		</div>
 		<form
 			method="post"
@@ -43,7 +58,9 @@
 		>
 			<div class="-space-y-px rounded-md shadow-sm">
 				<div class="mb-4">
-					<label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+					<label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+						>Username</label
+					>
 					<!-- svelte-ignore a11y_autofocus -->
 					<input
 						id="username"
@@ -57,12 +74,12 @@
 						title="Username must be 3-31 characters long and can only contain letters, numbers, underscores, and hyphens."
 						aria-invalid={!!form?.errors?.username}
 						aria-describedby="username-helper {form?.errors?.username ? 'username-error' : ''}"
-						class="mt-1 block w-full appearance-none rounded-md border px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm {form
+						class="mt-1 block w-full appearance-none rounded-md border px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 {form
 							?.errors?.username
 							? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-							: 'border-gray-300'}"
+							: 'border-gray-300 dark:border-gray-600'}"
 					/>
-					<p id="username-helper" class="mt-1 text-xs text-gray-500">
+					<p id="username-helper" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
 						3-31 characters, alphanumeric, -, _
 					</p>
 					{#if form?.errors?.username}
@@ -70,7 +87,9 @@
 					{/if}
 				</div>
 				<div class="relative mb-4">
-					<label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+					<label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+						>Password</label
+					>
 					<div class="relative mt-1 rounded-md shadow-sm">
 						<input
 							id="password"
@@ -80,12 +99,13 @@
 							required
 							minlength="6"
 							maxlength="255"
+							bind:value={password}
 							aria-invalid={!!form?.errors?.password}
 							aria-describedby="password-helper {form?.errors?.password ? 'password-error' : ''}"
-							class="block w-full appearance-none rounded-md border px-3 py-2 pr-10 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm {form
+							class="block w-full appearance-none rounded-md border px-3 py-2 pr-10 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 {form
 								?.errors?.password
 								? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-								: 'border-gray-300'}"
+								: 'border-gray-300 dark:border-gray-600'}"
 						/>
 						<button
 							type="button"
@@ -133,7 +153,37 @@
 							{/if}
 						</button>
 					</div>
-					<p id="password-helper" class="mt-1 text-xs text-gray-500">Min. 6 characters</p>
+					{#if password.length > 0}
+						<div class="mt-2 flex gap-1">
+							{#each Array(4) as _, i (i)}
+								<div
+									class="h-1 flex-1 rounded-full transition-colors duration-300 {i < strength
+										? strength <= 1
+											? 'bg-red-500'
+											: strength === 2
+												? 'bg-yellow-500'
+												: strength === 3
+													? 'bg-blue-500'
+													: 'bg-green-500'
+										: 'bg-gray-200 dark:bg-gray-600'}"
+								></div>
+							{/each}
+						</div>
+						<p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+							{#if strength <= 1}
+								Weak
+							{:else if strength === 2}
+								Fair
+							{:else if strength === 3}
+								Good
+							{:else}
+								Strong
+							{/if}
+						</p>
+					{/if}
+					<p id="password-helper" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+						Min. 6 characters
+					</p>
 					{#if form?.errors?.password}
 						<p id="password-error" class="mt-1 text-sm text-red-600">{form.errors.password}</p>
 					{/if}
@@ -181,11 +231,11 @@
 				<button
 					formaction="?/register"
 					disabled={!!loadingAction}
-					class="group relative flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+					class="group relative flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
 				>
 					{#if loadingAction === 'register'}
 						<svg
-							class="mr-3 -ml-1 h-5 w-5 animate-spin text-gray-700"
+							class="mr-3 -ml-1 h-5 w-5 animate-spin text-gray-700 dark:text-gray-200"
 							xmlns="http://www.w3.org/2000/svg"
 							fill="none"
 							viewBox="0 0 24 24"
