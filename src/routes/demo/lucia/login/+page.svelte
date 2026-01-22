@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { toastState } from '$lib/state/toast.svelte';
 	import type { ActionData } from './$types.js';
 
 	let { form }: { form: ActionData } = $props();
 
-	let loading = $state(false);
+	let loadingAction = $state<string | null>(null);
 	let showPassword = $state(false);
 
 	function togglePassword() {
@@ -20,10 +21,21 @@
 		<form
 			method="post"
 			action="?/login"
-			use:enhance={() => {
-				loading = true;
-				return async ({ update }) => {
-					loading = false;
+			use:enhance={({ submitter }) => {
+				const isRegister =
+					submitter?.hasAttribute('formaction') &&
+					submitter.getAttribute('formaction')?.includes('register');
+				loadingAction = isRegister ? 'register' : 'login';
+				return async ({ update, result }) => {
+					loadingAction = null;
+					if (result.type === 'redirect') {
+						toastState.add(
+							isRegister ? 'Registered successfully!' : 'Logged in successfully!',
+							'success'
+						);
+					} else if (result.type === 'error') {
+						toastState.add('An unexpected error occurred.', 'error');
+					}
 					await update();
 				};
 			}}
@@ -36,6 +48,7 @@
 						id="username"
 						name="username"
 						required
+						autofocus
 						minlength="3"
 						maxlength="31"
 						pattern="[a-z0-9_-]+"
@@ -113,10 +126,10 @@
 			<div class="flex flex-col gap-3">
 				<button
 					type="submit"
-					disabled={loading}
+					disabled={!!loadingAction}
 					class="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 				>
-					{#if loading}
+					{#if loadingAction === 'login'}
 						<svg
 							class="mr-3 -ml-1 h-5 w-5 animate-spin text-white"
 							xmlns="http://www.w3.org/2000/svg"
@@ -137,17 +150,41 @@
 								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 							></path>
 						</svg>
-						Processing...
+						Logging in...
 					{:else}
 						Login
 					{/if}
 				</button>
 				<button
 					formaction="?/register"
-					disabled={loading}
+					disabled={!!loadingAction}
 					class="group relative flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 				>
-					Register
+					{#if loadingAction === 'register'}
+						<svg
+							class="mr-3 -ml-1 h-5 w-5 animate-spin text-gray-700"
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+						>
+							<circle
+								class="opacity-25"
+								cx="12"
+								cy="12"
+								r="10"
+								stroke="currentColor"
+								stroke-width="4"
+							></circle>
+							<path
+								class="opacity-75"
+								fill="currentColor"
+								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+							></path>
+						</svg>
+						Registering...
+					{:else}
+						Register
+					{/if}
 				</button>
 			</div>
 		</form>
