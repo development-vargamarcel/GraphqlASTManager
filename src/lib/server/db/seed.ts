@@ -36,12 +36,15 @@ async function main() {
 	const id = encodeBase32LowerCase(bytes);
 
 	try {
-		await db.insert(user).values({
-			id,
-			username,
-			passwordHash,
-			age: 25
-		}).onConflictDoNothing();
+		await db
+			.insert(user)
+			.values({
+				id,
+				username,
+				passwordHash,
+				age: 25
+			})
+			.onConflictDoNothing();
 
 		console.log(`User created: ${username} / ${password}`);
 	} catch (e) {

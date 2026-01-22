@@ -11,16 +11,16 @@ The schema is defined in `src/lib/server/db/schema.ts`.
 ### Tables
 
 1.  **User (`user`)**
-    -   `id`: Text, Primary Key (Random 120-bit ID).
-    -   `username`: Text, Unique, Lowercase.
-    -   `passwordHash`: Text.
-    -   `age`: Integer (Optional).
+    - `id`: Text, Primary Key (Random 120-bit ID).
+    - `username`: Text, Unique, Lowercase.
+    - `passwordHash`: Text.
+    - `age`: Integer (Optional).
 
 2.  **Session (`session`)**
-    -   `id`: Text, Primary Key (SHA256 hash of token).
-    -   `userId`: Text, Foreign Key to `user.id`.
-    -   `expiresAt`: Timestamp (Integer).
-    -   **Indexes**: explicit index on `userId` for faster lookups.
+    - `id`: Text, Primary Key (SHA256 hash of token).
+    - `userId`: Text, Foreign Key to `user.id`.
+    - `expiresAt`: Timestamp (Integer).
+    - **Indexes**: explicit index on `userId` for faster lookups.
 
 ## Migrations
 

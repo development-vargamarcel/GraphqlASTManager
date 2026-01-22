@@ -104,7 +104,6 @@ export async function validateSessionToken(token: string) {
 		}
 
 		return { session, user };
-
 	} catch (error) {
 		logger.error('Failed to validate session token', error);
 		// In case of error (e.g. db connection), we return nulls to fail safe

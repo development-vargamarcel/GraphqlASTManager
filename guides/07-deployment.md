@@ -9,6 +9,7 @@ npm run build
 ```
 
 This command:
+
 1.  Syncs SvelteKit types.
 2.  Compiles the Paraglide messages.
 3.  Builds the SvelteKit application using Vite.
@@ -21,6 +22,7 @@ The project currently uses `@sveltejs/adapter-auto`. This tries to detect the ta
 ### Node.js Deployment
 
 If you want to deploy to a standard Node.js server (e.g., VPS, Docker):
+
 1.  Install `@sveltejs/adapter-node`:
     ```bash
     npm install -D @sveltejs/adapter-node
@@ -33,13 +35,14 @@ If you want to deploy to a standard Node.js server (e.g., VPS, Docker):
 
 In production, ensure you set the required environment variables:
 
--   `DATABASE_URL`: Path to the SQLite DB or connection string.
--   `ORIGIN`: The full URL of your site (required by SvelteKit for CSRF protection in some adapters).
--   `BODY_SIZE_LIMIT`: (Optional) Limit for request body size.
+- `DATABASE_URL`: Path to the SQLite DB or connection string.
+- `ORIGIN`: The full URL of your site (required by SvelteKit for CSRF protection in some adapters).
+- `BODY_SIZE_LIMIT`: (Optional) Limit for request body size.
 
 ## Database in Production
 
 If using SQLite in production:
+
 1.  Ensure the persistent volume for the database file exists.
 2.  Run migrations on the production database before starting the app:
     ```bash

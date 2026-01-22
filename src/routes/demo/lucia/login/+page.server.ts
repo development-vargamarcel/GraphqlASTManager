@@ -60,7 +60,11 @@ export const actions: Actions = {
 		const session = await auth.createSession(sessionToken, existingUser.id);
 		auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
 
-		logger.info('User logged in', { userId: existingUser.id, username: existingUser.username, ip: clientIp });
+		logger.info('User logged in', {
+			userId: existingUser.id,
+			username: existingUser.username,
+			ip: clientIp
+		});
 
 		return redirect(302, '/demo/lucia');
 	},
@@ -101,5 +105,5 @@ export const actions: Actions = {
 			return fail(500, { message: 'An error has occurred' });
 		}
 		return redirect(302, '/demo/lucia');
-	},
+	}
 };

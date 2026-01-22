@@ -6,9 +6,9 @@ We use **Paraglide JS** for internationalization. It provides type-safe message 
 
 ## Structure
 
--   **Message Files**: Located in `messages/` (e.g., `en.json`, `es.json`).
--   **Configuration**: `project.inlang/settings.json`.
--   **Generated Code**: `src/lib/paraglide/` (do not edit manually).
+- **Message Files**: Located in `messages/` (e.g., `en.json`, `es.json`).
+- **Configuration**: `project.inlang/settings.json`.
+- **Generated Code**: `src/lib/paraglide/` (do not edit manually).
 
 ## Adding Translations
 
@@ -16,8 +16,8 @@ We use **Paraglide JS** for internationalization. It provides type-safe message 
 2.  Add a new key-value pair:
     ```json
     {
-        "hello_world": "Hello World",
-        "welcome_user": "Welcome, {name}!"
+	"hello_world": "Hello World",
+	"welcome_user": "Welcome, {name}!"
     }
     ```
 3.  The Paraglide compiler (running in Vite plugin) will automatically regenerate the types.
@@ -28,11 +28,10 @@ Import `m` from the generated paraglide folder.
 
 ```svelte
 <script>
-    import * as m from '$lib/paraglide/messages.js';
+	import * as m from '$lib/paraglide/messages.js';
 </script>
 
-<h1>{m.hello_world()}</h1>
-<p>{m.welcome_user({ name: 'Alice' })}</p>
+<h1>{m.hello_world()}</h1><p>{m.welcome_user({ name: 'Alice' })}</p>
 ```
 
 ## Language Switching

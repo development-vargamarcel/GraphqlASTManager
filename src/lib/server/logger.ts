@@ -33,7 +33,8 @@ export class Logger {
 	}
 
 	error(message: string, error?: unknown, meta?: Record<string, unknown>) {
-		const errorMeta = error instanceof Error ? { error: error.message, stack: error.stack } : { error };
+		const errorMeta =
+			error instanceof Error ? { error: error.message, stack: error.stack } : { error };
 		this.log(LogLevel.ERROR, message, { ...meta, ...errorMeta });
 	}
 

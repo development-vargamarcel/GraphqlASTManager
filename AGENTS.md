@@ -6,61 +6,63 @@ This project is a SvelteKit application using Drizzle ORM, custom authentication
 
 ## Architecture
 
--   **Frontend**: SvelteKit (Svelte 5) with Tailwind CSS v4.
--   **Backend**: SvelteKit Server Actions and Load functions.
--   **Database**: SQLite via Better-SQLite3 and Drizzle ORM.
--   **Auth**: Custom session-based authentication using:
-    -   `@node-rs/argon2` for password hashing.
-    -   `@oslojs/crypto` & `@oslojs/encoding` for token generation.
-    -   Session tokens are stored in `httpOnly` cookies (`auth-session`).
-    -   Sliding window sessions (renew automatically if active and within renewal threshold).
--   **Logging**: Structured JSON logging via `src/lib/server/logger.ts`.
--   **Validation**: Centralized validation in `src/lib/server/validation.ts`.
+- **Frontend**: SvelteKit (Svelte 5) with Tailwind CSS v4.
+- **Backend**: SvelteKit Server Actions and Load functions.
+- **Database**: SQLite via Better-SQLite3 and Drizzle ORM.
+- **Auth**: Custom session-based authentication using:
+  - `@node-rs/argon2` for password hashing.
+  - `@oslojs/crypto` & `@oslojs/encoding` for token generation.
+  - Session tokens are stored in `httpOnly` cookies (`auth-session`).
+  - Sliding window sessions (renew automatically if active and within renewal threshold).
+- **Logging**: Structured JSON logging via `src/lib/server/logger.ts`.
+- **Validation**: Centralized validation in `src/lib/server/validation.ts`.
 
 ## Database Schema
 
--   **User**: `id` (text, PK), `username` (text, unique), `passwordHash` (text), `age` (int).
--   **Session**: `id` (text, PK), `userId` (text, FK), `expiresAt` (int/timestamp).
+- **User**: `id` (text, PK), `username` (text, unique), `passwordHash` (text), `age` (int).
+- **Session**: `id` (text, PK), `userId` (text, FK), `expiresAt` (int/timestamp).
 
 ## Key Flows
 
 ### Authentication
 
 1.  **Login/Register**:
-    -   User submits form.
-    -   Rate limiter checks IP (5 req/min).
-    -   Input validation (length, allowed chars).
-    -   **Register**:
-        -   Username is normalized to lowercase.
-        -   User created in DB. Unique constraint handled.
-        -   Session created & cookie set.
-    -   **Login**:
-        -   Username lookup (lowercase).
-        -   Password verification (Argon2).
-        -   Session created & cookie set.
+    - User submits form.
+    - Rate limiter checks IP (5 req/min).
+    - Input validation (length, allowed chars).
+    - **Register**:
+      - Username is normalized to lowercase.
+      - User created in DB. Unique constraint handled.
+      - Session created & cookie set.
+    - **Login**:
+      - Username lookup (lowercase).
+      - Password verification (Argon2).
+      - Session created & cookie set.
 
 2.  **Session Management**:
-    -   `hooks.server.ts` validates session on every request.
-    -   Expired sessions are deleted.
-    -   Sessions nearing expiration (halfway through validity) are automatically renewed (expiry extended).
+    - `hooks.server.ts` validates session on every request.
+    - Expired sessions are deleted.
+    - Sessions nearing expiration (halfway through validity) are automatically renewed (expiry extended).
 
 ### Rate Limiting
 
--   **Global**: Applied in `src/hooks.server.ts` (100 req/min per IP) to protect the app.
--   **Auth Routes**: Stricter limit (5 req/min per IP) in login/register actions to prevent brute-force attacks.
+- **Global**: Applied in `src/hooks.server.ts` (100 req/min per IP) to protect the app.
+- **Auth Routes**: Stricter limit (5 req/min per IP) in login/register actions to prevent brute-force attacks.
 
 ## Setup Instructions
 
 1.  **Install dependencies**:
+
     ```bash
     npm install
     ```
 
 2.  **Environment Setup**:
-    -   Copy `.env.example` to `.env`.
-    -   Set `DATABASE_URL` (e.g., `local.db`).
+    - Copy `.env.example` to `.env`.
+    - Set `DATABASE_URL` (e.g., `local.db`).
 
 3.  **Database Initialization**:
+
     ```bash
     npm run db:generate
     npm run db:migrate
@@ -73,21 +75,23 @@ This project is a SvelteKit application using Drizzle ORM, custom authentication
 
 ## Testing
 
--   **Unit Tests**:
-    ```bash
-    npm run test:unit
-    ```
-    To test server logic only: `npm run test:unit -- src/lib/server/`
+- **Unit Tests**:
 
--   **End-to-End Tests**:
-    ```bash
-    npx playwright install # First time only
-    npm run test:e2e
-    ```
+  ```bash
+  npm run test:unit
+  ```
+
+  To test server logic only: `npm run test:unit -- src/lib/server/`
+
+- **End-to-End Tests**:
+  ```bash
+  npx playwright install # First time only
+  npm run test:e2e
+  ```
 
 ## Conventions
 
--   **Logging**: Use `Logger` class. Log errors with full context (params, error object).
--   **Error Handling**: Return user-friendly error messages in actions. Log technical details.
--   **Database**: Usernames are always stored and queried in lowercase.
--   **Security**: `hooks.server.ts` handles Security Headers (CSP, X-Frame-Options, etc.).
+- **Logging**: Use `Logger` class. Log errors with full context (params, error object).
+- **Error Handling**: Return user-friendly error messages in actions. Log technical details.
+- **Database**: Usernames are always stored and queried in lowercase.
+- **Security**: `hooks.server.ts` handles Security Headers (CSP, X-Frame-Options, etc.).
