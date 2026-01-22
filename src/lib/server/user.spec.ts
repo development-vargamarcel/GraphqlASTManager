@@ -16,7 +16,7 @@ vi.mock('$lib/server/db/index.js', () => ({
 vi.mock('$lib/server/logger.js', () => {
 	return {
 		Logger: class {
-			constructor(context: string) {}
+			constructor() {}
 			info = vi.fn();
 			warn = vi.fn();
 			error = vi.fn();
