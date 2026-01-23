@@ -21,7 +21,7 @@ test('verify home page and demo pages', async ({ page }) => {
 
 	// 2. Go to Authentication Demo
 	await page.click('text=Authentication');
-	await expect(page.getByRole('heading', { name: 'Login / Register' })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'Welcome Back' })).toBeVisible();
 
 	// 3. Go back and check Localization Demo
 	await page.goto('/');

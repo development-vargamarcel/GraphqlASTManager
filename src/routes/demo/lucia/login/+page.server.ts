@@ -78,10 +78,17 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 		const username = formData.get('username');
 		const password = formData.get('password');
+		const confirmPassword = formData.get('confirmPassword');
 
 		const validation = validateAuthFormData(username, password);
 		if (!validation.valid) {
 			return fail(400, { errors: validation.errors });
+		}
+
+		if (password !== confirmPassword) {
+			return fail(400, {
+				errors: { confirmPassword: 'Passwords do not match' } as Record<string, string>
+			});
 		}
 
 		const validUsername = username as string;
