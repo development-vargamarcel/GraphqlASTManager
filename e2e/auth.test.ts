@@ -7,9 +7,11 @@ test.describe('Authentication', () => {
 	test('should allow a user to register, logout and login', async ({ page }) => {
 		// Register
 		await page.goto('/demo/lucia/login');
+		await page.click('button[data-testid="register-tab"]'); // Switch to Register tab
 		await page.fill('input[name="username"]', username);
 		await page.fill('input[name="password"]', password);
-		await page.click('button:has-text("Register")');
+		await page.fill('input[name="confirmPassword"]', password);
+		await page.click('button[data-testid="submit-button"]');
 
 		// Verify redirected to profile page
 		await expect(page).toHaveURL('/demo/lucia');
@@ -20,9 +22,11 @@ test.describe('Authentication', () => {
 		await expect(page).toHaveURL('/demo/lucia/login');
 
 		// Login
+		// Note: Default mode is Login, so we don't strictly need to click login tab, but cleaner if we check/ensure
+		// But here we just landed on login page.
 		await page.fill('input[name="username"]', username);
 		await page.fill('input[name="password"]', password);
-		await page.click('button:has-text("Login")');
+		await page.click('button[data-testid="submit-button"]');
 
 		// Verify redirected to profile page
 		await expect(page).toHaveURL('/demo/lucia');
@@ -32,9 +36,11 @@ test.describe('Authentication', () => {
 	test('should show error when registering with existing username', async ({ page }) => {
 		// Register with same username again
 		await page.goto('/demo/lucia/login');
+		await page.click('button[data-testid="register-tab"]'); // Switch to Register tab
 		await page.fill('input[name="username"]', username);
 		await page.fill('input[name="password"]', password);
-		await page.click('button:has-text("Register")');
+		await page.fill('input[name="confirmPassword"]', password);
+		await page.click('button[data-testid="submit-button"]');
 
 		// Verify error message
 		await expect(page.locator('#username-error')).toContainText('Username already taken');
@@ -44,8 +50,22 @@ test.describe('Authentication', () => {
 		await page.goto('/demo/lucia/login');
 		await page.fill('input[name="username"]', username);
 		await page.fill('input[name="password"]', 'wrongpassword');
-		await page.click('button:has-text("Login")');
+		await page.click('button[data-testid="submit-button"]');
 
 		await expect(page.locator('.text-red-600')).toContainText('Incorrect username or password');
+	});
+
+	test('should show error when passwords do not match during registration', async ({ page }) => {
+		await page.goto('/demo/lucia/login');
+		await page.click('button[data-testid="register-tab"]');
+		await page.fill('input[name="username"]', `user_${Date.now()}`);
+		await page.fill('input[name="password"]', 'password123');
+		await page.fill('input[name="confirmPassword"]', 'password456');
+
+		// The button should be disabled due to client-side validation
+		await expect(page.locator('button[data-testid="submit-button"]')).toBeDisabled();
+
+		// Check for error text
+		await expect(page.locator('#confirm-password-error')).toContainText('Passwords do not match');
 	});
 });

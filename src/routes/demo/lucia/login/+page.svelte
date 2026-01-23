@@ -8,6 +8,8 @@
 	let loadingAction = $state<string | null>(null);
 	let showPassword = $state(false);
 	let password = $state('');
+	let confirmPassword = $state('');
+	let isRegister = $state(false);
 
 	let strength = $derived.by(() => {
 		let score = 0;
@@ -18,6 +20,8 @@
 		if (/[^A-Za-z0-9]/.test(password)) score++;
 		return Math.min(score, 4);
 	});
+
+	let passwordsMatch = $derived(isRegister ? password === confirmPassword : true);
 
 	function togglePassword() {
 		showPassword = !showPassword;
@@ -30,22 +34,41 @@
 	<div class="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow dark:bg-gray-800">
 		<div>
 			<h1 class="text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-				Login / Register
+				{isRegister ? 'Create an Account' : 'Welcome Back'}
 			</h1>
+			<div class="mt-4 flex justify-center border-b border-gray-200 dark:border-gray-700">
+				<button
+					data-testid="login-tab"
+					class="px-4 pb-2 text-sm font-medium {!isRegister
+						? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+						: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'}"
+					onclick={() => (isRegister = false)}
+				>
+					Login
+				</button>
+				<button
+					data-testid="register-tab"
+					class="px-4 pb-2 text-sm font-medium {isRegister
+						? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+						: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'}"
+					onclick={() => (isRegister = true)}
+				>
+					Register
+				</button>
+			</div>
 		</div>
 		<form
 			method="post"
-			action="?/login"
+			action={isRegister ? '?/register' : '?/login'}
 			use:enhance={({ submitter }) => {
-				const isRegister =
-					submitter?.hasAttribute('formaction') &&
-					submitter.getAttribute('formaction')?.includes('register');
-				loadingAction = isRegister ? 'register' : 'login';
+				const action = submitter?.getAttribute('formaction');
+				const isRegisterAction = action?.includes('register') || isRegister;
+				loadingAction = isRegisterAction ? 'register' : 'login';
 				return async ({ update, result }) => {
 					loadingAction = null;
 					if (result.type === 'redirect') {
 						toastState.add(
-							isRegister ? 'Registered successfully!' : 'Logged in successfully!',
+							isRegisterAction ? 'Registered successfully!' : 'Logged in successfully!',
 							'success'
 						);
 					} else if (result.type === 'error') {
@@ -56,8 +79,8 @@
 			}}
 			class="mt-8 space-y-6"
 		>
-			<div class="-space-y-px rounded-md shadow-sm">
-				<div class="mb-4">
+			<div class="-space-y-px space-y-4 rounded-md shadow-sm">
+				<div>
 					<label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300"
 						>Username</label
 					>
@@ -86,7 +109,7 @@
 						<p id="username-error" class="mt-1 text-sm text-red-600">{form.errors.username}</p>
 					{/if}
 				</div>
-				<div class="relative mb-4">
+				<div class="relative">
 					<label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300"
 						>Password</label
 					>
@@ -95,7 +118,7 @@
 							id="password"
 							type={showPassword ? 'text' : 'password'}
 							name="password"
-							autocomplete="current-password"
+							autocomplete={isRegister ? 'new-password' : 'current-password'}
 							required
 							minlength="6"
 							maxlength="255"
@@ -114,7 +137,6 @@
 							aria-label={showPassword ? 'Hide password' : 'Show password'}
 						>
 							{#if showPassword}
-								<!-- Eye Slash Icon -->
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
 									fill="none"
@@ -130,7 +152,6 @@
 									/>
 								</svg>
 							{:else}
-								<!-- Eye Icon -->
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
 									fill="none"
@@ -188,6 +209,45 @@
 						<p id="password-error" class="mt-1 text-sm text-red-600">{form.errors.password}</p>
 					{/if}
 				</div>
+
+				{#if isRegister}
+					<div class="relative">
+						<label
+							for="confirmPassword"
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+							>Confirm Password</label
+						>
+						<div class="relative mt-1 rounded-md shadow-sm">
+							<input
+								id="confirmPassword"
+								type={showPassword ? 'text' : 'password'}
+								name="confirmPassword"
+								autocomplete="new-password"
+								required
+								minlength="6"
+								maxlength="255"
+								bind:value={confirmPassword}
+								aria-invalid={!!form?.errors?.confirmPassword ||
+									(!passwordsMatch && confirmPassword.length > 0)}
+								aria-describedby="confirm-password-error"
+								class="block w-full appearance-none rounded-md border px-3 py-2 pr-10 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 {form
+									?.errors?.confirmPassword ||
+								(!passwordsMatch && confirmPassword.length > 0)
+									? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+									: 'border-gray-300 dark:border-gray-600'}"
+							/>
+						</div>
+						{#if !passwordsMatch && confirmPassword.length > 0}
+							<p id="confirm-password-error" class="mt-1 text-sm text-red-600">
+								Passwords do not match
+							</p>
+						{:else if form?.errors?.confirmPassword}
+							<p id="confirm-password-error" class="mt-1 text-sm text-red-600">
+								{form.errors.confirmPassword}
+							</p>
+						{/if}
+					</div>
+				{/if}
 			</div>
 
 			{#if form?.message}
@@ -197,68 +257,83 @@
 			{/if}
 
 			<div class="flex flex-col gap-3">
-				<button
-					type="submit"
-					disabled={!!loadingAction}
-					class="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+				{#if isRegister}
+					<button
+						data-testid="submit-button"
+						type="submit"
+						formaction="?/register"
+						disabled={!!loadingAction || !passwordsMatch}
+						class="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+					>
+						{#if loadingAction === 'register'}
+							<svg
+								class="mr-3 -ml-1 h-5 w-5 animate-spin text-white"
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+							>
+								<circle
+									class="opacity-25"
+									cx="12"
+									cy="12"
+									r="10"
+									stroke="currentColor"
+									stroke-width="4"
+								></circle>
+								<path
+									class="opacity-75"
+									fill="currentColor"
+									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+								></path>
+							</svg>
+							Registering...
+						{:else}
+							Register
+						{/if}
+					</button>
+				{:else}
+					<button
+						data-testid="submit-button"
+						type="submit"
+						formaction="?/login"
+						disabled={!!loadingAction}
+						class="group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+					>
+						{#if loadingAction === 'login'}
+							<svg
+								class="mr-3 -ml-1 h-5 w-5 animate-spin text-white"
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+							>
+								<circle
+									class="opacity-25"
+									cx="12"
+									cy="12"
+									r="10"
+									stroke="currentColor"
+									stroke-width="4"
+								></circle>
+								<path
+									class="opacity-75"
+									fill="currentColor"
+									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+								></path>
+							</svg>
+							Logging in...
+						{:else}
+							Login
+						{/if}
+					</button>
+				{/if}
+			</div>
+
+			<div class="mt-4 text-center">
+				<a
+					href="/"
+					class="text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+					>← Back to Home</a
 				>
-					{#if loadingAction === 'login'}
-						<svg
-							class="mr-3 -ml-1 h-5 w-5 animate-spin text-white"
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-						>
-							<circle
-								class="opacity-25"
-								cx="12"
-								cy="12"
-								r="10"
-								stroke="currentColor"
-								stroke-width="4"
-							></circle>
-							<path
-								class="opacity-75"
-								fill="currentColor"
-								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-							></path>
-						</svg>
-						Logging in...
-					{:else}
-						Login
-					{/if}
-				</button>
-				<button
-					formaction="?/register"
-					disabled={!!loadingAction}
-					class="group relative flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-				>
-					{#if loadingAction === 'register'}
-						<svg
-							class="mr-3 -ml-1 h-5 w-5 animate-spin text-gray-700 dark:text-gray-200"
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-						>
-							<circle
-								class="opacity-25"
-								cx="12"
-								cy="12"
-								r="10"
-								stroke="currentColor"
-								stroke-width="4"
-							></circle>
-							<path
-								class="opacity-75"
-								fill="currentColor"
-								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-							></path>
-						</svg>
-						Registering...
-					{:else}
-						Register
-					{/if}
-				</button>
 			</div>
 		</form>
 	</div>
