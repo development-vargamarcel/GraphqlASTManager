@@ -1,62 +1,367 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { toastState } from '$lib/state/toast.svelte';
-	import type { PageServerData } from './$types.js';
+	import type { ActionData, PageServerData } from './$types.js';
 
-	let { data }: { data: PageServerData } = $props();
+	let { data, form }: { data: PageServerData; form: ActionData } = $props();
 
-	let loading = $state(false);
+	let activeTab = $state('profile'); // profile, security, danger
+	let loadingAction = $state<string | null>(null);
+
+	// Password change state
+	let currentPassword = $state('');
+	let newPassword = $state('');
+	let confirmPassword = $state('');
+	let showPassword = $state(false);
+
+	function togglePassword() {
+		showPassword = !showPassword;
+	}
+
+	let strength = $derived.by(() => {
+		let score = 0;
+		if (newPassword.length > 5) score++;
+		if (newPassword.length > 10) score++;
+		if (/[A-Z]/.test(newPassword)) score++;
+		if (/[0-9]/.test(newPassword)) score++;
+		if (/[^A-Za-z0-9]/.test(newPassword)) score++;
+		return Math.min(score, 4);
+	});
+
+	let passwordsMatch = $derived(newPassword === confirmPassword);
 </script>
 
-<div class="flex min-h-[calc(100vh-12rem)] items-center justify-center">
-	<div class="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow dark:bg-gray-800">
+<div class="flex min-h-[calc(100vh-12rem)] items-center justify-center py-12">
+	<div class="w-full max-w-2xl space-y-8 rounded-lg bg-white p-8 shadow dark:bg-gray-800">
 		<div class="text-center">
 			<h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">
 				Hi, {data.user.username}!
 			</h1>
-			<p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Your user ID is {data.user.id}</p>
+			<p class="mt-2 text-sm text-gray-500 dark:text-gray-400">User ID: {data.user.id}</p>
 		</div>
 
-		<form
-			method="post"
-			action="?/logout"
-			use:enhance={() => {
-				loading = true;
-				return async ({ update, result }) => {
-					loading = false;
-					if (result.type === 'redirect') {
-						toastState.add('Signed out successfully', 'success');
-					}
-					await update();
-				};
-			}}
-			class="mt-8 space-y-6"
-		>
-			<button
-				type="submit"
-				disabled={loading}
-				class="group relative flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-			>
-				{#if loading}
-					<svg
-						class="mr-3 -ml-1 h-5 w-5 animate-spin text-white"
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 24 24"
+		<!-- Tabs -->
+		<div class="border-b border-gray-200 dark:border-gray-700">
+			<nav class="-mb-px flex space-x-8 justify-center" aria-label="Tabs">
+				<button
+					onclick={() => (activeTab = 'profile')}
+					class="{activeTab === 'profile'
+						? 'border-blue-500 text-blue-600 dark:text-blue-400'
+						: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'} whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium"
+				>
+					Profile
+				</button>
+				<button
+					onclick={() => (activeTab = 'security')}
+					class="{activeTab === 'security'
+						? 'border-blue-500 text-blue-600 dark:text-blue-400'
+						: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'} whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium"
+				>
+					Security
+				</button>
+				<button
+					onclick={() => (activeTab = 'danger')}
+					data-testid="danger-tab"
+					class="{activeTab === 'danger'
+						? 'border-red-500 text-red-600 dark:text-red-400'
+						: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'} whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium"
+				>
+					Danger Zone
+				</button>
+			</nav>
+		</div>
+
+		<div class="mt-6">
+			{#if activeTab === 'profile'}
+				<h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">Profile Settings</h2>
+				<form
+					method="post"
+					action="?/updateProfile"
+					use:enhance={() => {
+						loadingAction = 'updateProfile';
+						return async ({ update, result }) => {
+							loadingAction = null;
+							if (result.type === 'success') {
+								toastState.add('Profile updated successfully', 'success');
+							} else if (result.type === 'failure') {
+								toastState.add(
+									result.data?.message?.toString() || 'Failed to update profile',
+									'error'
+								);
+							}
+							await update();
+						};
+					}}
+					class="space-y-6"
+				>
+					<div>
+						<label for="age" class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+							>Age</label
+						>
+						<input
+							type="number"
+							name="age"
+							id="age"
+							min="0"
+							max="150"
+							value={data.user.age ?? ''}
+							class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+						/>
+					</div>
+					<button
+						type="submit"
+						disabled={loadingAction === 'updateProfile'}
+						class="flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 					>
-						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
-						></circle>
-						<path
-							class="opacity-75"
-							fill="currentColor"
-							d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-						></path>
-					</svg>
-					Signing out...
-				{:else}
-					Sign out
-				{/if}
-			</button>
-		</form>
+						{#if loadingAction === 'updateProfile'}
+							Saving...
+						{:else}
+							Save Changes
+						{/if}
+					</button>
+				</form>
+			{:else if activeTab === 'security'}
+				<h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">Change Password</h2>
+				<form
+					method="post"
+					action="?/changePassword"
+					use:enhance={() => {
+						loadingAction = 'changePassword';
+						return async ({ update, result }) => {
+							loadingAction = null;
+							if (result.type === 'success') {
+								toastState.add('Password changed successfully', 'success');
+								// Reset form fields
+								currentPassword = '';
+								newPassword = '';
+								confirmPassword = '';
+							} else if (result.type === 'failure') {
+								toastState.add(
+									result.data?.message?.toString() || 'Failed to change password',
+									'error'
+								);
+							}
+							await update();
+						};
+					}}
+					class="space-y-6"
+				>
+					<div>
+						<label
+							for="currentPassword"
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Password</label
+						>
+						<input
+							type="password"
+							name="currentPassword"
+							id="currentPassword"
+							required
+							bind:value={currentPassword}
+							class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+						/>
+						{#if form?.errors?.currentPassword}
+							<p class="mt-1 text-sm text-red-600">{form.errors.currentPassword}</p>
+						{/if}
+					</div>
+					<div class="relative">
+						<label
+							for="newPassword"
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label
+						>
+						<div class="relative mt-1">
+							<input
+								type={showPassword ? 'text' : 'password'}
+								name="newPassword"
+								id="newPassword"
+								required
+								minlength="6"
+								bind:value={newPassword}
+								class="block w-full rounded-md border border-gray-300 px-3 py-2 pr-10 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+							/>
+							<button
+								type="button"
+								class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-500 focus:outline-none"
+								onclick={togglePassword}
+								aria-label={showPassword ? 'Hide password' : 'Show password'}
+							>
+								{#if showPassword}
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke-width="1.5"
+										stroke="currentColor"
+										class="size-5"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"
+										/>
+									</svg>
+								{:else}
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke-width="1.5"
+										stroke="currentColor"
+										class="size-5"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
+										/>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+										/>
+									</svg>
+								{/if}
+							</button>
+						</div>
+						<!-- Strength Meter -->
+						{#if newPassword.length > 0}
+							<div class="mt-2 flex gap-1">
+								{#each Array(4) as _, i (i)}
+									<div
+										class="h-1 flex-1 rounded-full transition-colors duration-300 {i < strength
+											? strength <= 1
+												? 'bg-red-500'
+												: strength === 2
+													? 'bg-yellow-500'
+													: strength === 3
+														? 'bg-blue-500'
+														: 'bg-green-500'
+											: 'bg-gray-200 dark:bg-gray-600'}"
+									></div>
+								{/each}
+							</div>
+							<p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+								{#if strength <= 1}
+									Weak
+								{:else if strength === 2}
+									Fair
+								{:else if strength === 3}
+									Good
+								{:else}
+									Strong
+								{/if}
+							</p>
+						{/if}
+						{#if form?.errors?.newPassword}
+							<p class="mt-1 text-sm text-red-600">{form.errors.newPassword}</p>
+						{/if}
+					</div>
+					<div>
+						<label
+							for="confirmPassword"
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm Password</label
+						>
+						<input
+							type={showPassword ? 'text' : 'password'}
+							name="confirmPassword"
+							id="confirmPassword"
+							required
+							bind:value={confirmPassword}
+							class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+						/>
+						{#if !passwordsMatch && confirmPassword.length > 0}
+							<p class="mt-1 text-sm text-red-600">Passwords do not match</p>
+						{:else if form?.errors?.confirmPassword}
+							<p class="mt-1 text-sm text-red-600">{form.errors.confirmPassword}</p>
+						{/if}
+					</div>
+					<button
+						type="submit"
+						disabled={loadingAction === 'changePassword' ||
+							!passwordsMatch ||
+							newPassword.length === 0}
+						class="flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+					>
+						{#if loadingAction === 'changePassword'}
+							Updating...
+						{:else}
+							Update Password
+						{/if}
+					</button>
+				</form>
+			{:else if activeTab === 'danger'}
+				<h2 class="mb-4 text-xl font-semibold text-red-600 dark:text-red-400">Danger Zone</h2>
+				<div class="rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
+					<h3 class="text-sm font-medium text-red-800 dark:text-red-200">Delete Account</h3>
+					<div class="mt-2 text-sm text-red-700 dark:text-red-300">
+						<p>
+							Once you delete your account, there is no going back. Please be certain.
+						</p>
+					</div>
+					<div class="mt-4">
+						<form
+							method="post"
+							action="?/deleteAccount"
+							use:enhance={() => {
+								loadingAction = 'deleteAccount';
+								return async ({ update, result }) => {
+									loadingAction = null;
+									if (result.type === 'redirect') {
+										toastState.add('Account deleted successfully', 'success');
+									} else if (result.type === 'failure') {
+										toastState.add(
+											result.data?.message?.toString() || 'Failed to delete account',
+											'error'
+										);
+									}
+									await update();
+								};
+							}}
+						>
+							<button
+								type="submit"
+								data-testid="delete-account-button"
+								disabled={loadingAction === 'deleteAccount'}
+								class="inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+							>
+								{#if loadingAction === 'deleteAccount'}
+									Deleting...
+								{:else}
+									Delete Account
+								{/if}
+							</button>
+						</form>
+					</div>
+				</div>
+			{/if}
+		</div>
+
+		<div class="mt-8 border-t border-gray-200 pt-6 dark:border-gray-700">
+			<form
+				method="post"
+				action="?/logout"
+				use:enhance={() => {
+					loadingAction = 'logout';
+					return async ({ update, result }) => {
+						loadingAction = null;
+						if (result.type === 'redirect') {
+							toastState.add('Signed out successfully', 'success');
+						}
+						await update();
+					};
+				}}
+			>
+				<button
+					type="submit"
+					disabled={loadingAction === 'logout'}
+					class="w-full text-center text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+				>
+					{#if loadingAction === 'logout'}
+						Signing out...
+					{:else}
+						Sign out
+					{/if}
+				</button>
+			</form>
+		</div>
 	</div>
 </div>

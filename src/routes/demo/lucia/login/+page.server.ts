@@ -7,7 +7,7 @@ import type { Actions, PageServerLoad } from './$types.js';
 import { Logger } from '$lib/server/logger.js';
 
 const logger = new Logger('login-action');
-const limiter = new RateLimiter(60 * 1000, 5); // 5 requests per minute
+const limiter = new RateLimiter(60 * 1000, 20); // 20 requests per minute
 
 export const load: PageServerLoad = async (event) => {
 	if (event.locals.user) {
