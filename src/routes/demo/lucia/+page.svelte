@@ -29,6 +29,9 @@
 	});
 
 	let passwordsMatch = $derived(newPassword === confirmPassword);
+	let errors = $derived(
+		form && typeof form === 'object' && 'errors' in form ? (form as any).errors : {}
+	);
 </script>
 
 <div class="flex min-h-[calc(100vh-12rem)] items-center justify-center py-12">
@@ -42,12 +45,12 @@
 
 		<!-- Tabs -->
 		<div class="border-b border-gray-200 dark:border-gray-700">
-			<nav class="-mb-px flex space-x-8 justify-center" aria-label="Tabs">
+			<nav class="-mb-px flex justify-center space-x-8" aria-label="Tabs">
 				<button
 					onclick={() => (activeTab = 'profile')}
 					class="{activeTab === 'profile'
 						? 'border-blue-500 text-blue-600 dark:text-blue-400'
-						: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'} whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium"
+						: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'} border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap"
 				>
 					Profile
 				</button>
@@ -55,7 +58,7 @@
 					onclick={() => (activeTab = 'security')}
 					class="{activeTab === 'security'
 						? 'border-blue-500 text-blue-600 dark:text-blue-400'
-						: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'} whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium"
+						: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'} border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap"
 				>
 					Security
 				</button>
@@ -64,7 +67,7 @@
 					data-testid="danger-tab"
 					class="{activeTab === 'danger'
 						? 'border-red-500 text-red-600 dark:text-red-400'
-						: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'} whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium"
+						: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'} border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap"
 				>
 					Danger Zone
 				</button>
@@ -105,13 +108,13 @@
 							min="0"
 							max="150"
 							value={data.user.age ?? ''}
-							class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+							class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
 						/>
 					</div>
 					<button
 						type="submit"
 						disabled={loadingAction === 'updateProfile'}
-						class="flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+						class="flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						{#if loadingAction === 'updateProfile'}
 							Saving...
@@ -149,7 +152,8 @@
 					<div>
 						<label
 							for="currentPassword"
-							class="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Password</label
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+							>Current Password</label
 						>
 						<input
 							type="password"
@@ -157,10 +161,10 @@
 							id="currentPassword"
 							required
 							bind:value={currentPassword}
-							class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+							class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
 						/>
-						{#if form?.errors?.currentPassword}
-							<p class="mt-1 text-sm text-red-600">{form.errors.currentPassword}</p>
+						{#if errors?.currentPassword}
+							<p class="mt-1 text-sm text-red-600">{errors.currentPassword}</p>
 						{/if}
 					</div>
 					<div class="relative">
@@ -176,7 +180,7 @@
 								required
 								minlength="6"
 								bind:value={newPassword}
-								class="block w-full rounded-md border border-gray-300 px-3 py-2 pr-10 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+								class="block w-full rounded-md border border-gray-300 px-3 py-2 pr-10 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
 							/>
 							<button
 								type="button"
@@ -251,14 +255,15 @@
 								{/if}
 							</p>
 						{/if}
-						{#if form?.errors?.newPassword}
-							<p class="mt-1 text-sm text-red-600">{form.errors.newPassword}</p>
+						{#if errors?.newPassword}
+							<p class="mt-1 text-sm text-red-600">{errors.newPassword}</p>
 						{/if}
 					</div>
 					<div>
 						<label
 							for="confirmPassword"
-							class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm Password</label
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+							>Confirm Password</label
 						>
 						<input
 							type={showPassword ? 'text' : 'password'}
@@ -266,12 +271,12 @@
 							id="confirmPassword"
 							required
 							bind:value={confirmPassword}
-							class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+							class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
 						/>
 						{#if !passwordsMatch && confirmPassword.length > 0}
 							<p class="mt-1 text-sm text-red-600">Passwords do not match</p>
-						{:else if form?.errors?.confirmPassword}
-							<p class="mt-1 text-sm text-red-600">{form.errors.confirmPassword}</p>
+						{:else if errors?.confirmPassword}
+							<p class="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
 						{/if}
 					</div>
 					<button
@@ -279,7 +284,7 @@
 						disabled={loadingAction === 'changePassword' ||
 							!passwordsMatch ||
 							newPassword.length === 0}
-						class="flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+						class="flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						{#if loadingAction === 'changePassword'}
 							Updating...
@@ -290,12 +295,12 @@
 				</form>
 			{:else if activeTab === 'danger'}
 				<h2 class="mb-4 text-xl font-semibold text-red-600 dark:text-red-400">Danger Zone</h2>
-				<div class="rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
+				<div
+					class="rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20"
+				>
 					<h3 class="text-sm font-medium text-red-800 dark:text-red-200">Delete Account</h3>
 					<div class="mt-2 text-sm text-red-700 dark:text-red-300">
-						<p>
-							Once you delete your account, there is no going back. Please be certain.
-						</p>
+						<p>Once you delete your account, there is no going back. Please be certain.</p>
 					</div>
 					<div class="mt-4">
 						<form
@@ -321,7 +326,7 @@
 								type="submit"
 								data-testid="delete-account-button"
 								disabled={loadingAction === 'deleteAccount'}
-								class="inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+								class="inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 							>
 								{#if loadingAction === 'deleteAccount'}
 									Deleting...

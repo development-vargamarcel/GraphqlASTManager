@@ -139,7 +139,9 @@ describe('user', () => {
 		});
 
 		it('should throw error if db fails', async () => {
-			const mockSet = vi.fn().mockReturnValue({ where: vi.fn().mockRejectedValue(new Error('DB Error')) });
+			const mockSet = vi
+				.fn()
+				.mockReturnValue({ where: vi.fn().mockRejectedValue(new Error('DB Error')) });
 			vi.mocked(db.update).mockReturnValue({ set: mockSet } as any);
 
 			await expect(user.updateUserAge('1', 25)).rejects.toThrow('DB Error');
@@ -157,7 +159,9 @@ describe('user', () => {
 		});
 
 		it('should throw error if db fails', async () => {
-			const mockSet = vi.fn().mockReturnValue({ where: vi.fn().mockRejectedValue(new Error('DB Error')) });
+			const mockSet = vi
+				.fn()
+				.mockReturnValue({ where: vi.fn().mockRejectedValue(new Error('DB Error')) });
 			vi.mocked(db.update).mockReturnValue({ set: mockSet } as any);
 
 			await expect(user.updateUserPassword('1', 'newhash')).rejects.toThrow('DB Error');

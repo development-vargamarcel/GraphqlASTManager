@@ -25,6 +25,9 @@ export const SESSION_COOKIE_OPTIONS = {
 
 /**
  * Generates a random session token.
+ * Uses 18 bytes of randomness encoded in Base64url.
+ *
+ * @returns A string representing the session token.
  */
 export function generateSessionToken() {
 	const bytes = crypto.getRandomValues(new Uint8Array(18));
@@ -34,6 +37,9 @@ export function generateSessionToken() {
 
 /**
  * Generates a random user ID with 120 bits of entropy.
+ * Uses 15 bytes of randomness encoded in Base32 (lowercase).
+ *
+ * @returns A string representing the user ID.
  */
 export function generateUserId() {
 	// ID with 120 bits of entropy, or about the same as UUID v4.
@@ -44,8 +50,12 @@ export function generateUserId() {
 
 /**
  * Creates a new session in the database.
- * @param token The session token.
- * @param userId The user ID.
+ * The token is hashed before storage.
+ *
+ * @param token - The raw session token.
+ * @param userId - The user ID to associate with the session.
+ * @returns The created session object.
+ * @throws Will throw an error if the session creation fails.
  */
 export async function createSession(token: string, userId: string) {
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
@@ -66,8 +76,11 @@ export async function createSession(token: string, userId: string) {
 
 /**
  * Validates a session token.
- * Handles session expiration and renewal (sliding window).
- * @param token The session token to validate.
+ * Checks against the database and handles session expiration.
+ * Implements a sliding window mechanism to renew sessions that are halfway through their expiration.
+ *
+ * @param token - The raw session token to validate.
+ * @returns An object containing the session and user if valid, or nulls if invalid/expired.
  */
 export async function validateSessionToken(token: string) {
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
@@ -113,6 +126,12 @@ export async function validateSessionToken(token: string) {
 
 export type SessionValidationResult = Awaited<ReturnType<typeof validateSessionToken>>;
 
+/**
+ * Invalidates a session by deleting it from the database.
+ *
+ * @param sessionId - The ID of the session to invalidate.
+ * @throws Will throw an error if invalidation fails.
+ */
 export async function invalidateSession(sessionId: string) {
 	try {
 		await db.delete(table.session).where(eq(table.session.id, sessionId));
@@ -123,6 +142,13 @@ export async function invalidateSession(sessionId: string) {
 	}
 }
 
+/**
+ * Sets the session token as a cookie on the response.
+ *
+ * @param event - The RequestEvent object.
+ * @param token - The session token.
+ * @param expiresAt - The expiration date for the cookie.
+ */
 export function setSessionTokenCookie(event: RequestEvent, token: string, expiresAt: Date) {
 	event.cookies.set(SESSION_COOKIE_NAME, token, {
 		...SESSION_COOKIE_OPTIONS,
@@ -130,6 +156,12 @@ export function setSessionTokenCookie(event: RequestEvent, token: string, expire
 	});
 }
 
+/**
+ * Hashes a password using Argon2.
+ *
+ * @param password - The plain text password.
+ * @returns The hashed password string.
+ */
 export async function hashPassword(password: string): Promise<string> {
 	return await hash(password, {
 		memoryCost: 19456,
@@ -139,6 +171,13 @@ export async function hashPassword(password: string): Promise<string> {
 	});
 }
 
+/**
+ * Verifies a password against a hash using Argon2.
+ *
+ * @param hash - The hashed password.
+ * @param password - The plain text password to verify.
+ * @returns True if the password matches the hash, false otherwise.
+ */
 export async function verifyPassword(hash: string, password: string): Promise<boolean> {
 	return await verify(hash, password, {
 		memoryCost: 19456,
@@ -148,6 +187,11 @@ export async function verifyPassword(hash: string, password: string): Promise<bo
 	});
 }
 
+/**
+ * Deletes the session token cookie from the response.
+ *
+ * @param event - The RequestEvent object.
+ */
 export function deleteSessionTokenCookie(event: RequestEvent) {
 	event.cookies.delete(SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS);
 }
