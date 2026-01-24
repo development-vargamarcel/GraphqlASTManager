@@ -1,9 +1,19 @@
+/**
+ * The type of toast notification.
+ */
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
+/**
+ * Represents a toast notification object.
+ */
 export interface Toast {
+	/** Unique identifier for the toast. */
 	id: string;
+	/** The message to display. */
 	message: string;
+	/** The type of the toast. */
 	type: ToastType;
+	/** Duration in milliseconds. */
 	duration?: number;
 }
 

@@ -10,12 +10,30 @@ import { Logger } from '$lib/server/logger.js';
 
 const logger = new Logger('auth');
 
+/**
+ * One day in milliseconds.
+ */
 export const DAY_IN_MS = 1000 * 60 * 60 * 24;
+
+/**
+ * The duration in days for which a session is valid.
+ */
 export const SESSION_EXPIRATION_DAYS = 30;
+
+/**
+ * The threshold in days before a session is considered for renewal.
+ */
 export const SESSION_RENEWAL_THRESHOLD_DAYS = 15;
 
+/**
+ * The name of the session cookie.
+ */
 export const SESSION_COOKIE_NAME = 'auth-session';
 
+/**
+ * Default options for the session cookie.
+ * Configured to be httpOnly, secure (in production), and lax sameSite.
+ */
 export const SESSION_COOKIE_OPTIONS = {
 	path: '/',
 	httpOnly: true,
