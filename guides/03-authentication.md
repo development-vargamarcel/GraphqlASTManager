@@ -39,6 +39,14 @@ Authentication is implemented using a custom session-based system. It relies on 
 - **Expiration**: Sessions are valid for 30 days.
 - **Sliding Window**: If a user is active and the session is more than 15 days old (halfway to expiration), the expiration is automatically extended by another 30 days.
 
+## User Profile Features
+
+Once authenticated, the dashboard provides the following features:
+
+- **Update Profile**: Users can update their profile information (e.g., age).
+- **Change Password**: Users can change their password. This requires entering the current password for verification.
+- **Delete Account**: Users can permanently delete their account. This removes the user and all associated sessions from the database.
+
 ## Security Measures
 
 - **Rate Limiting**:

@@ -7,6 +7,8 @@ export interface Toast {
 	duration?: number;
 }
 
+export const DEFAULT_TOAST_DURATION = 5000;
+
 /**
  * Global state for managing toast notifications.
  * Uses Svelte 5 Runes for reactivity.
@@ -19,9 +21,9 @@ class ToastState {
 	 *
 	 * @param message - The text message to display.
 	 * @param type - The type of toast (success, error, info, warning).
-	 * @param duration - Duration in milliseconds before auto-dismissing. Defaults to 5000.
+	 * @param duration - Duration in milliseconds before auto-dismissing. Defaults to DEFAULT_TOAST_DURATION.
 	 */
-	add(message: string, type: ToastType = 'info', duration = 5000) {
+	add(message: string, type: ToastType = 'info', duration = DEFAULT_TOAST_DURATION) {
 		const id = crypto.randomUUID();
 		const toast: Toast = { id, message, type, duration };
 		this.toasts.push(toast);

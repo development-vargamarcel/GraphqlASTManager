@@ -16,6 +16,7 @@
 			<nav class="ml-10 hidden space-x-8 md:flex">
 				<a
 					href="/"
+					aria-current={page.url.pathname === '/' ? 'page' : undefined}
 					class:text-blue-600={page.url.pathname === '/'}
 					class:text-gray-500={page.url.pathname !== '/'}
 					class="text-sm font-medium hover:text-gray-900 dark:text-gray-300 dark:hover:text-white {page
@@ -25,6 +26,7 @@
 				>
 				<a
 					href="/demo/lucia"
+					aria-current={page.url.pathname.startsWith('/demo/lucia') ? 'page' : undefined}
 					class:text-blue-600={page.url.pathname.startsWith('/demo/lucia')}
 					class:text-gray-500={!page.url.pathname.startsWith('/demo/lucia')}
 					class="text-sm font-medium hover:text-gray-900 dark:text-gray-300 dark:hover:text-white {page.url.pathname.startsWith(
@@ -35,6 +37,7 @@
 				>
 				<a
 					href="/demo/paraglide"
+					aria-current={page.url.pathname.startsWith('/demo/paraglide') ? 'page' : undefined}
 					class:text-blue-600={page.url.pathname.startsWith('/demo/paraglide')}
 					class:text-gray-500={!page.url.pathname.startsWith('/demo/paraglide')}
 					class="text-sm font-medium hover:text-gray-900 dark:text-gray-300 dark:hover:text-white {page.url.pathname.startsWith(
