@@ -85,10 +85,12 @@ export const actions: Actions = {
 
 		const validation = validateAuthFormData(username, password);
 		if (!validation.valid) {
+			logger.debug('Registration validation failed', { errors: validation.errors, ip: clientIp });
 			return fail(400, { errors: validation.errors });
 		}
 
 		if (password !== confirmPassword) {
+			logger.debug('Registration failed: passwords do not match', { ip: clientIp });
 			return fail(400, {
 				errors: { confirmPassword: 'Passwords do not match' } as Record<string, string>
 			});

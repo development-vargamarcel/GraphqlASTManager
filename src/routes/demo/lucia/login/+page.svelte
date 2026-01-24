@@ -1,3 +1,9 @@
+<!--
+  @component
+  The combined Login and Registration page.
+  Uses a tabbed interface to toggle between login and register forms.
+  Handles authentication submissions via SvelteKit actions.
+-->
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { toastState } from '$lib/state/toast.svelte';
