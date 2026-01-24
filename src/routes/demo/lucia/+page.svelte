@@ -53,8 +53,8 @@
 				<button
 					type="button"
 					class="rounded bg-gray-100 p-1 text-gray-500 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
-					onclick={() => {
-						navigator.clipboard.writeText(data.user.id);
+					onclick={async () => {
+						await navigator.clipboard.writeText(data.user.id);
 						toastState.add('User ID copied to clipboard', 'success');
 					}}
 					aria-label="Copy User ID"
