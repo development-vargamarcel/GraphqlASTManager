@@ -1,3 +1,8 @@
+<!--
+  @component
+  Demonstration page for Paraglide localization.
+  Allows users to switch locales and see the effect on translated text.
+-->
 <script lang="ts">
 	import { setLocale } from '$lib/paraglide/runtime.js';
 	import { m } from '$lib/paraglide/messages.js';
