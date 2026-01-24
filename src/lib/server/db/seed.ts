@@ -13,12 +13,20 @@ if (!process.env.DATABASE_URL) {
 const client = new Database(process.env.DATABASE_URL);
 const db = drizzle(client);
 
+/**
+ * Main function to seed the database with initial data.
+ * Creates a default user if they don't already exist.
+ */
 async function main() {
-	console.log('Seeding database...');
-
-	// Clean up existing test user if any
-	// Note: We don't have a clean way to truncate without raw SQL or delete
-	// But let's just try to insert a new one or ignore if exists.
+	const timestamp = new Date().toISOString();
+	console.log(
+		JSON.stringify({
+			timestamp,
+			level: 'INFO',
+			message: 'Seeding database started',
+			dbUrl: process.env.DATABASE_URL
+		})
+	);
 
 	const username = 'demo';
 	const password = 'password123';
@@ -36,7 +44,7 @@ async function main() {
 	const id = encodeBase32LowerCase(bytes);
 
 	try {
-		await db
+		const result = await db
 			.insert(user)
 			.values({
 				id,
@@ -44,14 +52,47 @@ async function main() {
 				passwordHash,
 				age: 25
 			})
-			.onConflictDoNothing();
+			.onConflictDoNothing()
+			.returning();
 
-		console.log(`User created: ${username} / ${password}`);
+		if (result.length > 0) {
+			console.log(
+				JSON.stringify({
+					timestamp: new Date().toISOString(),
+					level: 'INFO',
+					message: 'User created',
+					username,
+					password
+				})
+			);
+		} else {
+			console.log(
+				JSON.stringify({
+					timestamp: new Date().toISOString(),
+					level: 'INFO',
+					message: 'User already exists, skipped creation',
+					username
+				})
+			);
+		}
 	} catch (e) {
-		console.error('Error seeding user:', e);
+		console.error(
+			JSON.stringify({
+				timestamp: new Date().toISOString(),
+				level: 'ERROR',
+				message: 'Error seeding user',
+				error: e instanceof Error ? e.message : e
+			})
+		);
 	}
 
-	console.log('Seeding complete.');
+	console.log(
+		JSON.stringify({
+			timestamp: new Date().toISOString(),
+			level: 'INFO',
+			message: 'Seeding complete'
+		})
+	);
 }
 
 main().catch((e) => {

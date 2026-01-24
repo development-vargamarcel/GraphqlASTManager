@@ -18,6 +18,8 @@ This is a SvelteKit application featuring custom authentication, SQLite database
     npm install
     ```
 
+    _Note: The `prepare` script will automatically run `svelte-kit sync` and `paraglide-js compile`. If you encounter missing module errors, try running `npm run prepare` manually._
+
 2.  **Database Setup**:
     Copy `.env.example` to `.env` and configure `DATABASE_URL`.
 

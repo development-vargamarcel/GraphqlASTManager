@@ -19,6 +19,10 @@ function isStaticAsset(pathname: string): boolean {
 	);
 }
 
+/**
+ * Handle hook for rate limiting.
+ * Applies global rate limiting to all requests except static assets.
+ */
 const handleRateLimit: Handle = async ({ event, resolve }) => {
 	// Skip rate limiting for static assets (managed by adapter usually, but good to be safe)
 	if (isStaticAsset(event.url.pathname)) {
@@ -34,6 +38,10 @@ const handleRateLimit: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
+/**
+ * Handle hook for request logging.
+ * Logs incoming requests and their duration/status.
+ */
 const handleLogging: Handle = async ({ event, resolve }) => {
 	const start = Date.now();
 	const response = await resolve(event);
@@ -52,6 +60,10 @@ const handleLogging: Handle = async ({ event, resolve }) => {
 	return response;
 };
 
+/**
+ * Handle hook for setting security headers.
+ * Adds CSP, X-Frame-Options, etc., to responses.
+ */
 const handleSecurityHeaders: Handle = async ({ event, resolve }) => {
 	const response = await resolve(event);
 
@@ -68,6 +80,10 @@ const handleSecurityHeaders: Handle = async ({ event, resolve }) => {
 	return response;
 };
 
+/**
+ * Handle hook for localization.
+ * Uses Paraglide middleware to handle language negotiation and URL rewriting.
+ */
 const handleParaglide: Handle = ({ event, resolve }) =>
 	paraglideMiddleware(event.request, ({ request, locale }) => {
 		event.request = request;
@@ -77,6 +93,10 @@ const handleParaglide: Handle = ({ event, resolve }) =>
 		});
 	});
 
+/**
+ * Handle hook for authentication.
+ * Validates session tokens and sets the user/session in `locals`.
+ */
 const handleAuth: Handle = async ({ event, resolve }) => {
 	const sessionToken = event.cookies.get(auth.SESSION_COOKIE_NAME);
 
