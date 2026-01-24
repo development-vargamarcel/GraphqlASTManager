@@ -58,6 +58,7 @@ test.describe('Dashboard & User Management', () => {
 		await page.click('button[data-testid="danger-tab"]');
 		await expect(page.locator('h2')).toContainText('Danger Zone');
 
+		await page.fill('input[name="confirmation"]', 'DELETE');
 		await page.click('button[data-testid="delete-account-button"]');
 		await expect(page).toHaveURL('/demo/lucia/login');
 
