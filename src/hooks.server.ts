@@ -119,6 +119,11 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
+/**
+ * Global server hook.
+ * Chains multiple middleware functions to handle logging, security headers,
+ * rate limiting, localization, and authentication for every request.
+ */
 export const handle: Handle = sequence(
 	handleLogging,
 	handleSecurityHeaders,
