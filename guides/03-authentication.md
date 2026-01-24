@@ -46,3 +46,15 @@ Authentication is implemented using a custom session-based system. It relies on 
   - Auth endpoints: Stricter limits can be applied to login/register actions.
 - **CSRF Protection**: SvelteKit's native CSRF protection is enabled for form actions.
 - **Cookie Security**: Cookies are configured to be inaccessible to client-side JS (`httpOnly`).
+
+## User Dashboard Features
+
+The dashboard (`/demo/lucia`) provides authenticated users with account management tools:
+
+- **Profile Management**: Users can update their profile information (e.g., Age).
+- **Copy User ID**: A convenient button next to the User ID allows users to quickly copy their unique identifier to the clipboard.
+- **Security Settings**:
+  - **Change Password**: Users can update their password. This requires entering the current password for verification.
+  - **Password Visibility**: Both "New Password" and "Current Password" fields include a toggle to show/hide the password text for better usability.
+  - **Password Strength**: A real-time strength meter provides feedback on the new password complexity.
+- **Danger Zone**: Users can permanently delete their account. This action requires an explicit confirmation by typing "DELETE".

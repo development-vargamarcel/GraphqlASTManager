@@ -1,6 +1,6 @@
 import { sequence } from '@sveltejs/kit/hooks';
 import * as auth from '$lib/server/auth.js';
-import type { Handle } from '@sveltejs/kit';
+import type { Handle, HandleServerError } from '@sveltejs/kit';
 import { paraglideMiddleware } from '$lib/paraglide/server.js';
 import { RateLimiter } from '$lib/server/rate-limiter.js';
 import { Logger } from '$lib/server/logger.js';
@@ -132,3 +132,21 @@ export const handle: Handle = sequence(
 	handleParaglide,
 	handleAuth
 );
+
+/**
+ * Handle server-side errors.
+ * Logs the error and returns a generic message to the client.
+ */
+export const handleError: HandleServerError = ({ error, event }) => {
+	const errorId = crypto.randomUUID();
+	logger.error('Unexpected server error', error, {
+		errorId,
+		path: event.url.pathname,
+		method: event.request.method
+	});
+
+	return {
+		message: 'An unexpected error occurred. Please try again later.',
+		errorId
+	};
+};

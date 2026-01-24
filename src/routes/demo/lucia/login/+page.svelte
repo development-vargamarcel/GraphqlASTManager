@@ -21,6 +21,10 @@
 	let confirmPassword = $state('');
 	let isRegister = $state(false);
 
+	/**
+	 * Calculates the strength of the password.
+	 * Score ranges from 0 to 4 based on length and character types.
+	 */
 	let strength = $derived.by(() => {
 		let score = 0;
 		if (password.length > 5) score++;
@@ -33,6 +37,9 @@
 
 	let passwordsMatch = $derived(isRegister ? password === confirmPassword : true);
 
+	/**
+	 * Toggles the visibility of the password field.
+	 */
 	function togglePassword() {
 		showPassword = !showPassword;
 	}
