@@ -1,3 +1,8 @@
+<!--
+  @component
+  The home page of the application.
+  Serves as a landing page with links to the main features (Authentication, Localization).
+-->
 <div class="space-y-12">
 	<div class="text-center">
 		<h1

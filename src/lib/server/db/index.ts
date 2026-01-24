@@ -7,4 +7,8 @@ if (!env.DATABASE_URL) throw new Error('DATABASE_URL is not set');
 
 const client = new Database(env.DATABASE_URL);
 
+/**
+ * The Drizzle ORM database instance.
+ * Initialized with the `better-sqlite3` driver and the schema definition.
+ */
 export const db = drizzle(client, { schema });

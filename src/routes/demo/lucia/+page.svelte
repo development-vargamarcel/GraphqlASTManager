@@ -1,3 +1,9 @@
+<!--
+  @component
+  The user dashboard page.
+  Protected route accessible only to authenticated users.
+  Provides profile management, password change, and account deletion functionality.
+-->
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { toastState } from '$lib/state/toast.svelte';

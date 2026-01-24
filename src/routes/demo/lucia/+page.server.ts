@@ -49,11 +49,16 @@ export const actions: Actions = {
 		const ageStr = formData.get('age');
 
 		if (!ageStr || typeof ageStr !== 'string') {
+			logger.debug('Update profile failed: invalid age format', { userId: event.locals.user.id });
 			return fail(400, { message: 'Invalid age provided' });
 		}
 
 		const age = parseInt(ageStr, 10);
 		if (isNaN(age) || age < 0 || age > 150) {
+			logger.debug('Update profile failed: invalid age range', {
+				userId: event.locals.user.id,
+				age
+			});
 			return fail(400, { message: 'Invalid age provided' });
 		}
 
@@ -82,6 +87,7 @@ export const actions: Actions = {
 			!validation.validatePassword(newPassword) ||
 			!validation.validatePassword(confirmPassword)
 		) {
+			logger.debug('Change password failed: validation error', { userId: event.locals.user.id });
 			return fail(400, {
 				message: 'Invalid password provided',
 				errors: {
@@ -93,6 +99,9 @@ export const actions: Actions = {
 		}
 
 		if (newPassword !== confirmPassword) {
+			logger.debug('Change password failed: passwords do not match', {
+				userId: event.locals.user.id
+			});
 			return fail(400, {
 				message: 'Passwords do not match',
 				errors: { confirmPassword: 'Passwords do not match' }
@@ -107,6 +116,7 @@ export const actions: Actions = {
 
 		const validPassword = await auth.verifyPassword(user.passwordHash, currentPassword);
 		if (!validPassword) {
+			logger.debug('Change password failed: incorrect current password', { userId: user.id });
 			return fail(400, {
 				message: 'Incorrect current password',
 				errors: { currentPassword: 'Incorrect password' }

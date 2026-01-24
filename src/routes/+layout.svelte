@@ -1,3 +1,8 @@
+<!--
+  @component
+  The root layout component for the application.
+  Defines the global structure including Header, Footer, and global state components (Toast, LoadingBar).
+-->
 <script lang="ts">
 	import '../app.css';
 	import Header from '$lib/components/Header.svelte';

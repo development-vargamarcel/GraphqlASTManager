@@ -36,7 +36,11 @@ This is a SvelteKit application featuring custom authentication, SQLite database
 ## Testing
 
 - **Unit Tests**: `npm run test:unit`
-- **E2E Tests**: `npm run test:e2e`
+- **E2E Tests**:
+  ```bash
+  npx playwright install # First time only
+  npm run test:e2e
+  ```
 
 ## Documentation
 

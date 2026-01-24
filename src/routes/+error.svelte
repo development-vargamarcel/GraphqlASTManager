@@ -1,3 +1,8 @@
+<!--
+  @component
+  The global error page.
+  Displays error status and message when an unhandled error occurs or a load function fails.
+-->
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { base } from '$app/paths';
