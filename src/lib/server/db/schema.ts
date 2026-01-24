@@ -31,6 +31,12 @@ export const session = sqliteTable(
 	}
 );
 
+/**
+ * Type definition for a Session object inferred from the schema.
+ */
 export type Session = typeof session.$inferSelect;
 
+/**
+ * Type definition for a User object inferred from the schema.
+ */
 export type User = typeof user.$inferSelect;
