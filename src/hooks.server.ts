@@ -147,6 +147,6 @@ export const handleError: HandleServerError = ({ error, event }) => {
 
 	return {
 		message: 'An unexpected error occurred. Please try again later.',
-		code: errorId
+		errorId
 	};
 };
