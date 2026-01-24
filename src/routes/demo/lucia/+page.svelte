@@ -18,15 +18,23 @@
 	let currentPassword = $state('');
 	let newPassword = $state('');
 	let confirmPassword = $state('');
-	let showPassword = $state(false);
+	let showCurrentPassword = $state(false);
+	let showNewPassword = $state(false);
 
 	let deleteConfirmation = $state('');
 
 	/**
-	 * Toggles the visibility of the password fields.
+	 * Toggles the visibility of the current password field.
 	 */
-	function togglePassword() {
-		showPassword = !showPassword;
+	function toggleCurrentPassword() {
+		showCurrentPassword = !showCurrentPassword;
+	}
+
+	/**
+	 * Toggles the visibility of the new password and confirm password fields.
+	 */
+	function toggleNewPassword() {
+		showNewPassword = !showNewPassword;
 	}
 
 	/**
@@ -198,7 +206,7 @@
 						>
 						<div class="relative mt-1">
 							<input
-								type={showPassword ? 'text' : 'password'}
+								type={showCurrentPassword ? 'text' : 'password'}
 								name="currentPassword"
 								id="currentPassword"
 								required
@@ -208,10 +216,10 @@
 							<button
 								type="button"
 								class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-500 focus:outline-none"
-								onclick={togglePassword}
-								aria-label={showPassword ? 'Hide password' : 'Show password'}
+								onclick={toggleCurrentPassword}
+								aria-label={showCurrentPassword ? 'Hide password' : 'Show password'}
 							>
-								{#if showPassword}
+								{#if showCurrentPassword}
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
 										fill="none"
@@ -262,7 +270,7 @@
 						>
 						<div class="relative mt-1">
 							<input
-								type={showPassword ? 'text' : 'password'}
+								type={showNewPassword ? 'text' : 'password'}
 								name="newPassword"
 								id="newPassword"
 								required
@@ -273,10 +281,10 @@
 							<button
 								type="button"
 								class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-500 focus:outline-none"
-								onclick={togglePassword}
-								aria-label={showPassword ? 'Hide password' : 'Show password'}
+								onclick={toggleNewPassword}
+								aria-label={showNewPassword ? 'Hide password' : 'Show password'}
 							>
-								{#if showPassword}
+								{#if showNewPassword}
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
 										fill="none"
@@ -356,7 +364,7 @@
 							>Confirm Password</label
 						>
 						<input
-							type={showPassword ? 'text' : 'password'}
+							type={showNewPassword ? 'text' : 'password'}
 							name="confirmPassword"
 							id="confirmPassword"
 							required
