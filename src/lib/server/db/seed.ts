@@ -1,3 +1,8 @@
+/**
+ * Database seeding script.
+ * Populates the database with initial data for development and testing.
+ * Can be run via `npm run db:seed`.
+ */
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
@@ -14,8 +19,13 @@ const client = new Database(process.env.DATABASE_URL);
 const db = drizzle(client);
 
 /**
- * Main function to seed the database with initial data.
- * Creates a default user if they don't already exist.
+ * Main execution function for the seeding process.
+ *
+ * Performs the following actions:
+ * 1. Hashes the default password ('password123') using Argon2.
+ * 2. Generates a unique user ID.
+ * 3. Attempts to insert a 'demo' user into the database.
+ * 4. Logs the outcome (created or skipped) in JSON format.
  */
 async function main() {
 	const timestamp = new Date().toISOString();

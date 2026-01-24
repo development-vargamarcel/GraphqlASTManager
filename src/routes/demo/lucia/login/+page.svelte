@@ -11,6 +11,10 @@
 
 	let { form }: { form: ActionData } = $props();
 
+	// Derived runes to safely access form properties and avoid TS union errors
+	let formErrors = $derived((form as any)?.errors ?? {});
+	let formMessage = $derived((form as any)?.message);
+
 	let loadingAction = $state<string | null>(null);
 	let showPassword = $state(false);
 	let password = $state('');
@@ -101,18 +105,17 @@
 						maxlength="31"
 						pattern="[a-zA-Z0-9_-]+"
 						title="Username must be 3-31 characters long and can only contain letters, numbers, underscores, and hyphens."
-						aria-invalid={!!form?.errors?.username}
-						aria-describedby="username-helper {form?.errors?.username ? 'username-error' : ''}"
-						class="mt-1 block w-full appearance-none rounded-md border px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 {form
-							?.errors?.username
+						aria-invalid={!!formErrors.username}
+						aria-describedby="username-helper {formErrors.username ? 'username-error' : ''}"
+						class="mt-1 block w-full appearance-none rounded-md border px-3 py-2 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 {formErrors.username
 							? 'border-red-500 focus:border-red-500 focus:ring-red-500'
 							: 'border-gray-300 dark:border-gray-600'}"
 					/>
 					<p id="username-helper" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
 						3-31 characters, alphanumeric, -, _
 					</p>
-					{#if form?.errors?.username}
-						<p id="username-error" class="mt-1 text-sm text-red-600">{form.errors.username}</p>
+					{#if formErrors.username}
+						<p id="username-error" class="mt-1 text-sm text-red-600">{formErrors.username}</p>
 					{/if}
 				</div>
 				<div class="relative">
@@ -129,10 +132,9 @@
 							minlength="6"
 							maxlength="255"
 							bind:value={password}
-							aria-invalid={!!form?.errors?.password}
-							aria-describedby="password-helper {form?.errors?.password ? 'password-error' : ''}"
-							class="block w-full appearance-none rounded-md border px-3 py-2 pr-10 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 {form
-								?.errors?.password
+							aria-invalid={!!formErrors.password}
+							aria-describedby="password-helper {formErrors.password ? 'password-error' : ''}"
+							class="block w-full appearance-none rounded-md border px-3 py-2 pr-10 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 {formErrors.password
 								? 'border-red-500 focus:border-red-500 focus:ring-red-500'
 								: 'border-gray-300 dark:border-gray-600'}"
 						/>
@@ -150,6 +152,7 @@
 									stroke-width="1.5"
 									stroke="currentColor"
 									class="size-5"
+									aria-hidden="true"
 								>
 									<path
 										stroke-linecap="round"
@@ -165,6 +168,7 @@
 									stroke-width="1.5"
 									stroke="currentColor"
 									class="size-5"
+									aria-hidden="true"
 								>
 									<path
 										stroke-linecap="round"
@@ -211,8 +215,8 @@
 					<p id="password-helper" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
 						Min. 6 characters
 					</p>
-					{#if form?.errors?.password}
-						<p id="password-error" class="mt-1 text-sm text-red-600">{form.errors.password}</p>
+					{#if formErrors.password}
+						<p id="password-error" class="mt-1 text-sm text-red-600">{formErrors.password}</p>
 					{/if}
 				</div>
 
@@ -233,11 +237,10 @@
 								minlength="6"
 								maxlength="255"
 								bind:value={confirmPassword}
-								aria-invalid={!!form?.errors?.confirmPassword ||
+								aria-invalid={!!formErrors.confirmPassword ||
 									(!passwordsMatch && confirmPassword.length > 0)}
 								aria-describedby="confirm-password-error"
-								class="block w-full appearance-none rounded-md border px-3 py-2 pr-10 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 {form
-									?.errors?.confirmPassword ||
+								class="block w-full appearance-none rounded-md border px-3 py-2 pr-10 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:bg-gray-700 dark:text-white dark:placeholder-gray-500 {formErrors.confirmPassword ||
 								(!passwordsMatch && confirmPassword.length > 0)
 									? 'border-red-500 focus:border-red-500 focus:ring-red-500'
 									: 'border-gray-300 dark:border-gray-600'}"
@@ -247,18 +250,18 @@
 							<p id="confirm-password-error" class="mt-1 text-sm text-red-600">
 								Passwords do not match
 							</p>
-						{:else if form?.errors?.confirmPassword}
+						{:else if formErrors.confirmPassword}
 							<p id="confirm-password-error" class="mt-1 text-sm text-red-600">
-								{form.errors.confirmPassword}
+								{formErrors.confirmPassword}
 							</p>
 						{/if}
 					</div>
 				{/if}
 			</div>
 
-			{#if form?.message}
+			{#if formMessage}
 				<div class="rounded bg-red-50 p-2 text-sm text-red-600">
-					{form.message}
+					{formMessage}
 				</div>
 			{/if}
 
@@ -277,6 +280,7 @@
 								xmlns="http://www.w3.org/2000/svg"
 								fill="none"
 								viewBox="0 0 24 24"
+								aria-hidden="true"
 							>
 								<circle
 									class="opacity-25"
@@ -311,6 +315,7 @@
 								xmlns="http://www.w3.org/2000/svg"
 								fill="none"
 								viewBox="0 0 24 24"
+								aria-hidden="true"
 							>
 								<circle
 									class="opacity-25"

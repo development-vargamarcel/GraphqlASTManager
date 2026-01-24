@@ -3,16 +3,22 @@ import * as userFn from '$lib/server/user.js';
 import * as validation from '$lib/server/validation.js';
 import { Logger } from '$lib/server/logger.js';
 import { fail, redirect } from '@sveltejs/kit';
-import { getRequestEvent } from '$app/server';
 import type { Actions, PageServerLoad } from './$types.js';
 
 const logger = new Logger('lucia-profile');
 
-export const load: PageServerLoad = async () => {
-	const user = requireLogin();
+export const load: PageServerLoad = async (event) => {
+	if (!event.locals.user) {
+		return redirect(302, '/demo/lucia/login');
+	}
+	const user = event.locals.user;
+
+	logger.debug('Loading user profile', { userId: user.id });
+
 	// Fetch fresh user data to get the age
 	const freshUser = await userFn.getUserById(user.id);
 	if (!freshUser) {
+		logger.warn('User found in session but not in DB', { userId: user.id });
 		return redirect(302, '/demo/lucia/login');
 	}
 	// Return the fresh user data but ensure we don't leak sensitive info if any
@@ -152,13 +158,3 @@ export const actions: Actions = {
 		return redirect(302, '/demo/lucia/login');
 	}
 };
-
-function requireLogin() {
-	const { locals } = getRequestEvent();
-
-	if (!locals.user) {
-		return redirect(302, '/demo/lucia/login');
-	}
-
-	return locals.user;
-}
