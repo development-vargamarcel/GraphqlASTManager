@@ -28,7 +28,7 @@ This project is a SvelteKit application using Drizzle ORM, custom authentication
 
 1.  **Login/Register**:
     - User submits form.
-    - Rate limiter checks IP (5 req/min).
+    - Rate limiter checks IP (20 req/min).
     - Input validation (length, allowed chars).
     - **Register**:
       - Username is normalized to lowercase.
@@ -47,7 +47,7 @@ This project is a SvelteKit application using Drizzle ORM, custom authentication
 ### Rate Limiting
 
 - **Global**: Applied in `src/hooks.server.ts` (100 req/min per IP) to protect the app.
-- **Auth Routes**: Stricter limit (5 req/min per IP) in login/register actions to prevent brute-force attacks.
+- **Auth Routes**: Stricter limit (20 req/min per IP) in login/register actions to prevent brute-force attacks.
 
 ## Setup Instructions
 

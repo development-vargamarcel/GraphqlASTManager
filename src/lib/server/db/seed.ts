@@ -23,8 +23,7 @@ async function main() {
 		JSON.stringify({
 			timestamp,
 			level: 'INFO',
-			message: 'Seeding database started',
-			dbUrl: process.env.DATABASE_URL
+			message: 'Seeding database started'
 		})
 	);
 
