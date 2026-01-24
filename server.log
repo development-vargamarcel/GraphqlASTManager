@@ -40,3 +40,15 @@
 2:29:45 PM [vite] (ssr) page reload verification/verify_danger_zone.py
 {"timestamp":"2026-01-24T14:30:03.908Z","level":"DEBUG","context":"rate-limiter","message":"Cleaned up expired rate limit entries","count":1}
 {"timestamp":"2026-01-24T14:30:03.972Z","level":"DEBUG","context":"rate-limiter","message":"Cleaned up expired rate limit entries","count":1}
+{"timestamp":"2026-01-24T15:50:42.153Z","level":"INFO","context":"hooks","message":"Request processed","method":"GET","path":"/","status":200,"duration":841,"ip":"::1"}
+3:50:54 PM [vite] (ssr) page reload verification/check_console.py
+{"timestamp":"2026-01-24T15:50:59.890Z","level":"INFO","context":"hooks","message":"Request processed","method":"GET","path":"/","status":200,"duration":162,"ip":"::1"}
+{"timestamp":"2026-01-24T15:51:00.140Z","level":"INFO","context":"hooks","message":"Request processed","method":"GET","path":"/demo/lucia","status":302,"duration":3,"ip":"::1"}
+{"timestamp":"2026-01-24T15:51:00.174Z","level":"INFO","context":"hooks","message":"Request processed","method":"GET","path":"/demo/lucia/login","status":200,"duration":20,"ip":"::1"}
+{"timestamp":"2026-01-24T15:51:00.284Z","level":"INFO","context":"hooks","message":"Request processed","method":"GET","path":"/","status":200,"duration":16,"ip":"::1"}
+{"timestamp":"2026-01-24T15:51:00.625Z","level":"INFO","context":"hooks","message":"Request processed","method":"GET","path":"/demo/paraglide","status":200,"duration":150,"ip":"::1"}
+{"timestamp":"2026-01-24T15:51:50.364Z","level":"DEBUG","context":"rate-limiter","message":"Cleaned up expired rate limit entries","count":1}
+3:52:46 PM [vite] (client) hmr update /src/routes/demo/lucia/+page.svelte, /src/app.css
+3:52:46 PM [vite] (ssr) page reload src/routes/demo/lucia/+page.svelte
+3:52:46 PM [vite] (client) hmr update /src/routes/demo/lucia/+page.svelte, /src/app.css
+3:52:46 PM [vite] (ssr) page reload src/routes/demo/lucia/+page.svelte
