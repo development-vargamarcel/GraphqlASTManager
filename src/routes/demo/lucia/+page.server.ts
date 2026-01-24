@@ -64,6 +64,9 @@ export const actions: Actions = {
 		if (!event.locals.session || !event.locals.user) {
 			return fail(401);
 		}
+
+		logger.info('Update profile action initiated', { userId: event.locals.user.id });
+
 		const formData = await event.request.formData();
 		const ageStr = formData.get('age');
 
@@ -100,6 +103,9 @@ export const actions: Actions = {
 		if (!event.locals.session || !event.locals.user) {
 			return fail(401);
 		}
+
+		logger.info('Change password action initiated', { userId: event.locals.user.id });
+
 		const formData = await event.request.formData();
 		const currentPassword = formData.get('currentPassword');
 		const newPassword = formData.get('newPassword');
@@ -166,6 +172,8 @@ export const actions: Actions = {
 		if (!event.locals.session || !event.locals.user) {
 			return fail(401);
 		}
+
+		logger.info('Delete account action initiated', { userId: event.locals.user.id });
 
 		const formData = await event.request.formData();
 		const confirmation = formData.get('confirmation');

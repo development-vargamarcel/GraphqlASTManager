@@ -72,6 +72,7 @@
 						stroke-width="1.5"
 						stroke="currentColor"
 						class="inline size-4"
+						aria-hidden="true"
 					>
 						<path
 							stroke-linecap="round"
@@ -218,6 +219,7 @@
 										stroke-width="1.5"
 										stroke="currentColor"
 										class="size-5"
+										aria-hidden="true"
 									>
 										<path
 											stroke-linecap="round"
@@ -233,6 +235,7 @@
 										stroke-width="1.5"
 										stroke="currentColor"
 										class="size-5"
+										aria-hidden="true"
 									>
 										<path
 											stroke-linecap="round"
@@ -281,6 +284,7 @@
 										stroke-width="1.5"
 										stroke="currentColor"
 										class="size-5"
+										aria-hidden="true"
 									>
 										<path
 											stroke-linecap="round"
@@ -296,6 +300,7 @@
 										stroke-width="1.5"
 										stroke="currentColor"
 										class="size-5"
+										aria-hidden="true"
 									>
 										<path
 											stroke-linecap="round"
