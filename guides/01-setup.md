@@ -20,6 +20,8 @@
     npm install
     ```
 
+    _Note: The `prepare` script will automatically run `svelte-kit sync` and `paraglide-js compile`. If you encounter missing module errors, try running `npm run prepare` manually._
+
 3.  **Environment Configuration**:
     Copy the example environment file to create your local configuration:
     ```bash

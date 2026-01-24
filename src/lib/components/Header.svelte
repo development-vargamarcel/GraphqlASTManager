@@ -1,3 +1,9 @@
+<!--
+  @component
+  The main application header.
+  Includes the navigation menu and theme toggle.
+  Responsive design: shows a hamburger menu on small screens (currently hidden in this implementation) and full menu on larger screens.
+-->
 <script lang="ts">
 	import { page } from '$app/state';
 	import ThemeToggle from './ThemeToggle.svelte';

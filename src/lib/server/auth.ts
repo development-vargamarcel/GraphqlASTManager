@@ -116,6 +116,7 @@ export async function validateSessionToken(token: string) {
 				.where(eq(table.session.id, session.id));
 		}
 
+		logger.debug('Session validated', { sessionId: session.id, userId: user.id });
 		return { session, user };
 	} catch (error) {
 		logger.error('Failed to validate session token', error);
