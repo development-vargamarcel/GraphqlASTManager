@@ -9,6 +9,10 @@ import { Logger } from '$lib/server/logger.js';
 const logger = new Logger('login-action');
 const limiter = new RateLimiter(60 * 1000, 20); // 20 requests per minute
 
+/**
+ * Server load function for the login page.
+ * Redirects authenticated users to the dashboard.
+ */
 export const load: PageServerLoad = async (event) => {
 	if (event.locals.user) {
 		return redirect(302, '/demo/lucia');
@@ -16,6 +20,9 @@ export const load: PageServerLoad = async (event) => {
 	return {};
 };
 
+/**
+ * Validates the username and password fields from the form data.
+ */
 function validateAuthFormData(username: unknown, password: unknown) {
 	const errors: Record<string, string> = {};
 	if (!validateUsername(username)) {
@@ -27,7 +34,14 @@ function validateAuthFormData(username: unknown, password: unknown) {
 	return { valid: Object.keys(errors).length === 0, errors };
 }
 
+/**
+ * Form actions for login and registration.
+ */
 export const actions: Actions = {
+	/**
+	 * Handles user login.
+	 * Validates input, checks credentials, creates a session, and sets the session cookie.
+	 */
 	login: async (event) => {
 		const clientIp = event.getClientAddress();
 		if (!limiter.check(clientIp)) {
@@ -35,7 +49,10 @@ export const actions: Actions = {
 		}
 
 		const formData = await event.request.formData();
-		const username = formData.get('username');
+		let username = formData.get('username');
+		if (typeof username === 'string') {
+			username = username.trim();
+		}
 		const password = formData.get('password');
 
 		const validation = validateAuthFormData(username, password);
@@ -72,6 +89,10 @@ export const actions: Actions = {
 
 		return redirect(302, '/demo/lucia');
 	},
+	/**
+	 * Handles user registration.
+	 * Validates input, creates a new user, creates a session, and sets the session cookie.
+	 */
 	register: async (event) => {
 		const clientIp = event.getClientAddress();
 		if (!limiter.check(clientIp)) {
@@ -79,7 +100,10 @@ export const actions: Actions = {
 		}
 
 		const formData = await event.request.formData();
-		const username = formData.get('username');
+		let username = formData.get('username');
+		if (typeof username === 'string') {
+			username = username.trim();
+		}
 		const password = formData.get('password');
 		const confirmPassword = formData.get('confirmPassword');
 

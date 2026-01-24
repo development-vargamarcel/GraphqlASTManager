@@ -111,6 +111,7 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 	if (session) {
 		auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
 	} else {
+		logger.debug('Invalid or expired session token', { path: event.url.pathname });
 		auth.deleteSessionTokenCookie(event);
 	}
 

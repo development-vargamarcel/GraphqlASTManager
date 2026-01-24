@@ -7,6 +7,10 @@ import type { Actions, PageServerLoad } from './$types.js';
 
 const logger = new Logger('lucia-profile');
 
+/**
+ * Server load function for the user dashboard.
+ * Requires authentication. Returns the user profile data.
+ */
 export const load: PageServerLoad = async (event) => {
 	if (!event.locals.user) {
 		return redirect(302, '/demo/lucia/login');
@@ -34,7 +38,13 @@ export const load: PageServerLoad = async (event) => {
 	};
 };
 
+/**
+ * Form actions for user dashboard operations.
+ */
 export const actions: Actions = {
+	/**
+	 * Logs out the current user by invalidating the session and deleting the cookie.
+	 */
 	logout: async (event) => {
 		if (!event.locals.session) {
 			return fail(401);
@@ -47,6 +57,9 @@ export const actions: Actions = {
 		return redirect(302, '/demo/lucia/login');
 	},
 
+	/**
+	 * Updates the user's profile information (e.g., age).
+	 */
 	updateProfile: async (event) => {
 		if (!event.locals.session || !event.locals.user) {
 			return fail(401);
@@ -79,6 +92,10 @@ export const actions: Actions = {
 		return { message: 'Profile updated successfully' };
 	},
 
+	/**
+	 * Changes the user's password.
+	 * Verifies the current password before updating to the new one.
+	 */
 	changePassword: async (event) => {
 		if (!event.locals.session || !event.locals.user) {
 			return fail(401);
@@ -141,6 +158,10 @@ export const actions: Actions = {
 		return { message: 'Password updated successfully' };
 	},
 
+	/**
+	 * Deletes the user's account permanently.
+	 * Requires the user to type "DELETE" to confirm.
+	 */
 	deleteAccount: async (event) => {
 		if (!event.locals.session || !event.locals.user) {
 			return fail(401);

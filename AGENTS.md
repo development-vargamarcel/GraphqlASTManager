@@ -49,16 +49,16 @@ This project is a SvelteKit application using Drizzle ORM, custom authentication
 The dashboard (`/demo/lucia`) allows authenticated users to manage their account.
 
 1.  **Profile**:
-    -   View basic user info (ID, Username).
-    -   Update Age.
+    - View basic user info (ID, Username).
+    - Update Age.
 
 2.  **Security**:
-    -   Change password. Requires current password verification.
-    -   New password must meet validation criteria.
+    - Change password. Requires current password verification.
+    - New password must meet validation criteria.
 
 3.  **Danger Zone**:
-    -   Delete account.
-    -   **Enhancement**: Requires user to type "DELETE" to confirm the action.
+    - Delete account.
+    - Requires user to type "DELETE" to confirm the action.
 
 ### Rate Limiting
 
@@ -111,3 +111,7 @@ The dashboard (`/demo/lucia`) allows authenticated users to manage their account
 - **Error Handling**: Return user-friendly error messages in actions. Log technical details.
 - **Database**: Usernames are always stored and queried in lowercase.
 - **Security**: `hooks.server.ts` handles Security Headers (CSP, X-Frame-Options, etc.).
+- **UI/UX**:
+  - Use `toastState` (Svelte 5 Rune) for client-side notifications (success/error).
+  - Authentication forms use `autofocus` on the username field.
+- **Documentation**: All exported functions and actions must have JSDoc comments.
