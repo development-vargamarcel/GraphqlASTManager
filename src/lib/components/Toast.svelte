@@ -1,3 +1,8 @@
+<!--
+  @component
+  Displays a list of toast notifications managed by the global `toastState`.
+  Toasts are positioned at the bottom right of the viewport.
+-->
 <script lang="ts">
 	import { toastState } from '$lib/state/toast.svelte';
 	import { fly } from 'svelte/transition';

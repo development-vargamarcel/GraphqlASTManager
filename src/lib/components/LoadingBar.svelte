@@ -1,3 +1,8 @@
+<!--
+  @component
+  Displays a progress bar at the top of the screen during navigation.
+  Listens to the `$app/stores` `navigating` store.
+-->
 <script lang="ts">
 	import { navigating } from '$app/stores';
 	import { fade } from 'svelte/transition';

@@ -1,3 +1,8 @@
+<!--
+  @component
+  A button to toggle between light and dark themes.
+  Persists preference in `localStorage` and applies `.dark` class to `document.documentElement`.
+-->
 <script lang="ts">
 	import { onMount } from 'svelte';
 

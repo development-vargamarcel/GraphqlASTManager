@@ -40,6 +40,7 @@ export const actions: Actions = {
 
 		const validation = validateAuthFormData(username, password);
 		if (!validation.valid) {
+			logger.debug('Login validation failed', { errors: validation.errors, ip: clientIp });
 			return fail(400, { errors: validation.errors });
 		}
 
@@ -49,11 +50,13 @@ export const actions: Actions = {
 
 		const existingUser = await userModel.getUserByUsername(validUsername);
 		if (!existingUser) {
+			logger.debug('Login failed: user not found', { username: validUsername, ip: clientIp });
 			return fail(400, { message: 'Incorrect username or password' });
 		}
 
 		const validPasswordHash = await auth.verifyPassword(existingUser.passwordHash, validPassword);
 		if (!validPasswordHash) {
+			logger.debug('Login failed: incorrect password', { username: validUsername, ip: clientIp });
 			return fail(400, { message: 'Incorrect username or password' });
 		}
 

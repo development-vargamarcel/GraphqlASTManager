@@ -1,5 +1,9 @@
 import { integer, sqliteTable, text, index } from 'drizzle-orm/sqlite-core';
 
+/**
+ * User table definition.
+ * Stores user account information.
+ */
 export const user = sqliteTable('user', {
 	id: text('id').primaryKey(),
 	age: integer('age'),
@@ -7,6 +11,10 @@ export const user = sqliteTable('user', {
 	passwordHash: text('password_hash').notNull()
 });
 
+/**
+ * Session table definition.
+ * Stores active user sessions for authentication.
+ */
 export const session = sqliteTable(
 	'session',
 	{
