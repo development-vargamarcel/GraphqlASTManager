@@ -1,9 +1,12 @@
 import * as auth from '$lib/server/auth.js';
 import * as userFn from '$lib/server/user.js';
 import * as validation from '$lib/server/validation.js';
+import { Logger } from '$lib/server/logger.js';
 import { fail, redirect } from '@sveltejs/kit';
 import { getRequestEvent } from '$app/server';
 import type { Actions, PageServerLoad } from './$types.js';
+
+const logger = new Logger('lucia-profile');
 
 export const load: PageServerLoad = async () => {
 	const user = requireLogin();
@@ -33,6 +36,8 @@ export const actions: Actions = {
 		await auth.invalidateSession(event.locals.session.id);
 		auth.deleteSessionTokenCookie(event);
 
+		logger.info('User logged out', { userId: event.locals.user?.id });
+
 		return redirect(302, '/demo/lucia/login');
 	},
 
@@ -54,7 +59,9 @@ export const actions: Actions = {
 
 		try {
 			await userFn.updateUserAge(event.locals.user.id, age);
+			logger.info('User age updated', { userId: event.locals.user.id, age });
 		} catch (e) {
+			logger.error('Failed to update user age', e, { userId: event.locals.user.id });
 			return fail(500, { message: 'An unknown error occurred' });
 		}
 
@@ -109,7 +116,9 @@ export const actions: Actions = {
 		try {
 			const passwordHash = await auth.hashPassword(newPassword);
 			await userFn.updateUserPassword(user.id, passwordHash);
+			logger.info('User password updated', { userId: user.id });
 		} catch (e) {
+			logger.error('Failed to update user password', e, { userId: user.id });
 			return fail(500, { message: 'An unknown error occurred' });
 		}
 
@@ -124,7 +133,9 @@ export const actions: Actions = {
 		try {
 			await userFn.deleteUser(event.locals.user.id);
 			auth.deleteSessionTokenCookie(event);
+			logger.info('User account deleted', { userId: event.locals.user.id });
 		} catch (e) {
+			logger.error('Failed to delete user account', e, { userId: event.locals.user.id });
 			return fail(500, { message: 'An unknown error occurred' });
 		}
 

@@ -6,6 +6,13 @@ import { Logger } from '$lib/server/logger.js';
 
 const logger = new Logger('user');
 
+/**
+ * Retrieves a user by their username.
+ * The username is case-insensitive and will be normalized to lowercase.
+ *
+ * @param username - The username to search for.
+ * @returns The user object if found, otherwise undefined.
+ */
 export async function getUserByUsername(username: string): Promise<User | undefined> {
 	try {
 		const normalizedUsername = username.toLowerCase();
@@ -20,6 +27,12 @@ export async function getUserByUsername(username: string): Promise<User | undefi
 	}
 }
 
+/**
+ * Retrieves a user by their unique ID.
+ *
+ * @param userId - The unique identifier of the user.
+ * @returns The user object if found, otherwise undefined.
+ */
 export async function getUserById(userId: string): Promise<User | undefined> {
 	try {
 		const results = await db.select().from(table.user).where(eq(table.user.id, userId));
@@ -30,6 +43,16 @@ export async function getUserById(userId: string): Promise<User | undefined> {
 	}
 }
 
+/**
+ * Creates a new user in the database.
+ * The username is normalized to lowercase before storage.
+ *
+ * @param id - The unique identifier for the new user.
+ * @param username - The username for the new user.
+ * @param passwordHash - The hashed password for the new user.
+ * @returns The created user object.
+ * @throws Will throw an error if the user cannot be created (e.g., username already taken).
+ */
 export async function createUser(
 	id: string,
 	username: string,
@@ -52,6 +75,13 @@ export async function createUser(
 	}
 }
 
+/**
+ * Updates the age of a specific user.
+ *
+ * @param userId - The unique identifier of the user.
+ * @param age - The new age to set.
+ * @throws Will throw an error if the update fails.
+ */
 export async function updateUserAge(userId: string, age: number): Promise<void> {
 	try {
 		await db.update(table.user).set({ age }).where(eq(table.user.id, userId));
@@ -62,6 +92,13 @@ export async function updateUserAge(userId: string, age: number): Promise<void> 
 	}
 }
 
+/**
+ * Updates the password hash for a specific user.
+ *
+ * @param userId - The unique identifier of the user.
+ * @param passwordHash - The new hashed password.
+ * @throws Will throw an error if the update fails.
+ */
 export async function updateUserPassword(userId: string, passwordHash: string): Promise<void> {
 	try {
 		await db.update(table.user).set({ passwordHash }).where(eq(table.user.id, userId));
@@ -72,6 +109,12 @@ export async function updateUserPassword(userId: string, passwordHash: string): 
 	}
 }
 
+/**
+ * Deletes a user and all associated sessions.
+ *
+ * @param userId - The unique identifier of the user to delete.
+ * @throws Will throw an error if the deletion fails.
+ */
 export async function deleteUser(userId: string): Promise<void> {
 	try {
 		await db.delete(table.session).where(eq(table.session.userId, userId));

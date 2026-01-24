@@ -41,8 +41,15 @@ Before running the app, you need to set up the database schema.
     ```
 
 2.  **Apply migrations**:
+
     ```bash
     npm run db:migrate
+    ```
+
+3.  **Seed Database (Optional)**:
+    To populate the database with a demo user (`demo` / `password123`):
+    ```bash
+    npm run db:seed
     ```
 
 ## Running the Application
