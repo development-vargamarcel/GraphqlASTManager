@@ -1,3 +1,9 @@
+<!--
+  @component
+  The localization demo page.
+  Demonstrates internationalization (i18n) using Paraglide JS.
+  Allows users to switch the application's locale dynamically.
+-->
 <script lang="ts">
 	import { setLocale } from '$lib/paraglide/runtime.js';
 	import { m } from '$lib/paraglide/messages.js';

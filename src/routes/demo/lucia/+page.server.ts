@@ -146,6 +146,16 @@ export const actions: Actions = {
 			return fail(401);
 		}
 
+		const formData = await event.request.formData();
+		const confirmation = formData.get('confirmation');
+
+		if (confirmation !== 'DELETE') {
+			logger.debug('Delete account failed: confirmation incorrect', {
+				userId: event.locals.user.id
+			});
+			return fail(400, { message: 'Incorrect confirmation' });
+		}
+
 		try {
 			await userFn.deleteUser(event.locals.user.id);
 			auth.deleteSessionTokenCookie(event);

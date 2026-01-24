@@ -20,6 +20,8 @@
 	let confirmPassword = $state('');
 	let showPassword = $state(false);
 
+	let deleteConfirmation = $state('');
+
 	function togglePassword() {
 		showPassword = !showPassword;
 	}
@@ -306,7 +308,11 @@
 				>
 					<h3 class="text-sm font-medium text-red-800 dark:text-red-200">Delete Account</h3>
 					<div class="mt-2 text-sm text-red-700 dark:text-red-300">
-						<p>Once you delete your account, there is no going back. Please be certain.</p>
+						<p>
+							Once you delete your account, there is no going back. Please be certain.
+							<br />
+							Type <strong class="font-bold">DELETE</strong> to confirm.
+						</p>
 					</div>
 					<div class="mt-4">
 						<form
@@ -328,10 +334,21 @@
 								};
 							}}
 						>
+							<div class="mb-4">
+								<label for="confirmation" class="sr-only">Confirmation</label>
+								<input
+									type="text"
+									name="confirmation"
+									id="confirmation"
+									placeholder="Type DELETE"
+									class="block w-full rounded-md border-red-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm dark:border-red-700 dark:bg-red-900/30 dark:text-white dark:placeholder-red-300"
+									bind:value={deleteConfirmation}
+								/>
+							</div>
 							<button
 								type="submit"
 								data-testid="delete-account-button"
-								disabled={loadingAction === 'deleteAccount'}
+								disabled={loadingAction === 'deleteAccount' || deleteConfirmation !== 'DELETE'}
 								class="inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 							>
 								{#if loadingAction === 'deleteAccount'}
