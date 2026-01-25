@@ -101,6 +101,7 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 	const sessionToken = event.cookies.get(auth.SESSION_COOKIE_NAME);
 
 	if (!sessionToken) {
+		logger.debug('No session token found in request', { path: event.url.pathname });
 		event.locals.user = null;
 		event.locals.session = null;
 		return resolve(event);

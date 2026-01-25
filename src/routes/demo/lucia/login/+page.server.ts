@@ -78,7 +78,8 @@ export const actions: Actions = {
 		}
 
 		const sessionToken = auth.generateSessionToken();
-		const session = await auth.createSession(sessionToken, existingUser.id);
+		const userAgent = event.request.headers.get('user-agent');
+		const session = await auth.createSession(sessionToken, existingUser.id, clientIp, userAgent);
 		auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
 
 		logger.info('User logged in', {
@@ -130,7 +131,8 @@ export const actions: Actions = {
 			await userModel.createUser(userId, validUsername, passwordHash);
 
 			const sessionToken = auth.generateSessionToken();
-			const session = await auth.createSession(sessionToken, userId);
+			const userAgent = event.request.headers.get('user-agent');
+			const session = await auth.createSession(sessionToken, userId, clientIp, userAgent);
 			auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
 
 			logger.info('User registered', { userId, username: validUsername, ip: clientIp });

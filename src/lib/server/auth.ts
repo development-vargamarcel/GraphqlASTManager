@@ -54,15 +54,24 @@ export function generateUserId() {
  *
  * @param token - The raw session token.
  * @param userId - The user ID to associate with the session.
+ * @param ipAddress - The IP address of the user (optional).
+ * @param userAgent - The User Agent string of the user (optional).
  * @returns The created session object.
  * @throws Will throw an error if the session creation fails.
  */
-export async function createSession(token: string, userId: string) {
+export async function createSession(
+	token: string,
+	userId: string,
+	ipAddress: string | null = null,
+	userAgent: string | null = null
+) {
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
 	const session: table.Session = {
 		id: sessionId,
 		userId,
-		expiresAt: new Date(Date.now() + DAY_IN_MS * SESSION_EXPIRATION_DAYS)
+		expiresAt: new Date(Date.now() + DAY_IN_MS * SESSION_EXPIRATION_DAYS),
+		ipAddress,
+		userAgent
 	};
 	try {
 		await db.insert(table.session).values(session);
@@ -70,6 +79,22 @@ export async function createSession(token: string, userId: string) {
 		return session;
 	} catch (error) {
 		logger.error('Failed to create session', error, { userId });
+		throw error;
+	}
+}
+
+/**
+ * Retrieves all active sessions for a specific user.
+ *
+ * @param userId - The unique identifier of the user.
+ * @returns A list of session objects.
+ */
+export async function getUserSessions(userId: string): Promise<table.Session[]> {
+	try {
+		const sessions = await db.select().from(table.session).where(eq(table.session.userId, userId));
+		return sessions;
+	} catch (error) {
+		logger.error('Failed to get user sessions', error, { userId });
 		throw error;
 	}
 }
