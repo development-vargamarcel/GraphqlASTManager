@@ -46,3 +46,7 @@ This is a SvelteKit application featuring custom authentication, SQLite database
 ## Documentation
 
 See [AGENTS.md](./AGENTS.md) for detailed developer documentation, architecture, and flows.
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on how to contribute to this project.

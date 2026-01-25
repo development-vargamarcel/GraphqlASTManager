@@ -69,7 +69,7 @@
 					class="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
 					onclick={() => {
 						navigator.clipboard.writeText(data.user.id);
-						toastState.add('User ID copied to clipboard', 'success');
+						toastState.add('User ID copied!', 'success');
 					}}
 					aria-label="Copy User ID"
 					title="Copy User ID to clipboard"
@@ -176,6 +176,35 @@
 							Save Changes
 						{/if}
 					</button>
+
+					<div class="border-t border-gray-200 pt-6 dark:border-gray-700">
+						<h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Your Data</h3>
+						<div class="mt-4">
+							<a
+								href="/demo/lucia/export"
+								class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+							>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="1.5"
+									stroke="currentColor"
+									class="mr-2 -ml-1 h-5 w-5"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
+									/>
+								</svg>
+								Download My Data
+							</a>
+							<p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+								Download a copy of your personal data and session history in JSON format.
+							</p>
+						</div>
+					</div>
 				</form>
 			{:else if activeTab === 'security'}
 				<h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">Change Password</h2>
@@ -404,9 +433,39 @@
 				</form>
 
 				<div class="border-t border-gray-200 pt-6 dark:border-gray-700">
-					<h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-						Active Sessions
-					</h3>
+					<div class="flex items-center justify-between">
+						<h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+							Active Sessions
+						</h3>
+						{#if data.sessions.length > 1}
+							<form
+								method="post"
+								action="?/revokeOtherSessions"
+								use:enhance={() => {
+									loadingAction = 'revokeOtherSessions';
+									return async ({ update, result }) => {
+										loadingAction = null;
+										if (result.type === 'success') {
+											toastState.add('All other sessions revoked', 'success');
+										}
+										await update();
+									};
+								}}
+							>
+								<button
+									type="submit"
+									disabled={loadingAction === 'revokeOtherSessions'}
+									class="inline-flex items-center rounded border border-transparent bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-200 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
+								>
+									{#if loadingAction === 'revokeOtherSessions'}
+										Revoking...
+									{:else}
+										Revoke Others
+									{/if}
+								</button>
+							</form>
+						{/if}
+					</div>
 					<div
 						class="mt-4 overflow-hidden rounded-md border border-gray-200 shadow-sm dark:border-gray-700"
 					>
@@ -424,11 +483,14 @@
 												<span
 													class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200"
 												>
-													Current
+													Current Session
 												</span>
 											{/if}
 										</div>
-										<p class="mt-1 truncate text-xs text-gray-500 dark:text-gray-400">
+										<p
+											class="mt-1 truncate text-xs text-gray-500 dark:text-gray-400"
+											title={session.userAgent}
+										>
 											{session.userAgent || 'Unknown User Agent'}
 										</p>
 										<p class="mt-1 text-xs text-gray-400 dark:text-gray-500">

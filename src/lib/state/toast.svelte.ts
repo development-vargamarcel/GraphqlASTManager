@@ -25,6 +25,7 @@ class ToastState {
 		const id = crypto.randomUUID();
 		const toast: Toast = { id, message, type, duration };
 		this.toasts.push(toast);
+		console.debug(`[Toast] Added: ${message} (${type})`);
 
 		if (duration > 0) {
 			setTimeout(() => {
@@ -40,6 +41,7 @@ class ToastState {
 	 */
 	remove(id: string) {
 		this.toasts = this.toasts.filter((t) => t.id !== id);
+		console.debug(`[Toast] Removed: ${id}`);
 	}
 }
 

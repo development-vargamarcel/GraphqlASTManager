@@ -67,6 +67,40 @@ export class RateLimiter {
 	}
 
 	/**
+	 * Gets the number of remaining requests for a specific key.
+	 *
+	 * @param key - The unique identifier.
+	 * @returns The number of remaining requests.
+	 */
+	getRemaining(key: string): number {
+		const now = Date.now();
+		const record = this.hits.get(key);
+
+		if (!record || now > record.expiresAt) {
+			return this.maxRequests;
+		}
+
+		return Math.max(0, this.maxRequests - record.count);
+	}
+
+	/**
+	 * Gets the timestamp when the rate limit resets for a specific key.
+	 *
+	 * @param key - The unique identifier.
+	 * @returns The timestamp (in milliseconds) when the limit resets.
+	 */
+	getResetTime(key: string): number {
+		const now = Date.now();
+		const record = this.hits.get(key);
+
+		if (!record || now > record.expiresAt) {
+			return now + this.windowMs;
+		}
+
+		return record.expiresAt;
+	}
+
+	/**
 	 * Stops the cleanup interval. Should be called when the limiter is no longer needed.
 	 */
 	destroy() {

@@ -58,4 +58,28 @@ describe('RateLimiter', () => {
 		limiter.destroy();
 		expect(clearIntervalSpy).toHaveBeenCalled();
 	});
+
+	it('should provide correct remaining requests', () => {
+		expect(limiter.getRemaining('ip1')).toBe(2);
+		limiter.check('ip1');
+		expect(limiter.getRemaining('ip1')).toBe(1);
+		limiter.check('ip1');
+		expect(limiter.getRemaining('ip1')).toBe(0);
+		limiter.check('ip1'); // Blocked
+		expect(limiter.getRemaining('ip1')).toBe(0);
+
+		vi.advanceTimersByTime(1001);
+		expect(limiter.getRemaining('ip1')).toBe(2);
+	});
+
+	it('should provide correct reset time', () => {
+		const now = Date.now();
+		const resetTime = limiter.getResetTime('ip1');
+		// Should be now + windowMs (approximately)
+		expect(resetTime).toBeGreaterThanOrEqual(now + 1000);
+
+		limiter.check('ip1');
+		const resetTimeAfterCheck = limiter.getResetTime('ip1');
+		expect(resetTimeAfterCheck).toBe(resetTime);
+	});
 });

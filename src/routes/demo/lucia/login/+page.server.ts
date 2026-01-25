@@ -22,6 +22,10 @@ export const load: PageServerLoad = async (event) => {
 
 /**
  * Validates the username and password fields from the form data.
+ *
+ * @param username - The username input to validate.
+ * @param password - The password input to validate.
+ * @returns An object containing validation status and any errors.
  */
 function validateAuthFormData(username: unknown, password: unknown) {
 	const errors: Record<string, string> = {};

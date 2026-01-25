@@ -30,12 +30,28 @@ const handleRateLimit: Handle = async ({ event, resolve }) => {
 	}
 
 	const clientIp = event.getClientAddress();
-	if (!globalLimiter.check(clientIp)) {
+	const allowed = globalLimiter.check(clientIp);
+	const remaining = globalLimiter.getRemaining(clientIp);
+	const resetTime = globalLimiter.getResetTime(clientIp);
+
+	if (!allowed) {
 		logger.warn('Rate limit exceeded', { ip: clientIp, path: event.url.pathname });
-		return new Response('Too many requests', { status: 429 });
+		return new Response('Too many requests', {
+			status: 429,
+			headers: {
+				'X-RateLimit-Limit': '100',
+				'X-RateLimit-Remaining': remaining.toString(),
+				'X-RateLimit-Reset': Math.ceil(resetTime / 1000).toString()
+			}
+		});
 	}
 
-	return resolve(event);
+	const response = await resolve(event);
+	response.headers.set('X-RateLimit-Limit', '100');
+	response.headers.set('X-RateLimit-Remaining', remaining.toString());
+	response.headers.set('X-RateLimit-Reset', Math.ceil(resetTime / 1000).toString());
+
+	return response;
 };
 
 /**
@@ -44,11 +60,15 @@ const handleRateLimit: Handle = async ({ event, resolve }) => {
  */
 const handleLogging: Handle = async ({ event, resolve }) => {
 	const start = Date.now();
+	event.locals.requestId = crypto.randomUUID();
 	const response = await resolve(event);
 	const duration = Date.now() - start;
 
+	response.headers.set('X-Request-ID', event.locals.requestId);
+
 	if (!isStaticAsset(event.url.pathname)) {
 		logger.info('Request processed', {
+			requestId: event.locals.requestId,
 			method: event.request.method,
 			path: event.url.pathname,
 			status: response.status,

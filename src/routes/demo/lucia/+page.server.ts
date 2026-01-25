@@ -2,6 +2,7 @@ import * as auth from '$lib/server/auth.js';
 import * as userFn from '$lib/server/user.js';
 import * as validation from '$lib/server/validation.js';
 import { Logger } from '$lib/server/logger.js';
+import { parseUserAgent } from '$lib/server/ua.js';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types.js';
 
@@ -43,7 +44,7 @@ export const load: PageServerLoad = async (event) => {
 			id: s.id,
 			expiresAt: s.expiresAt,
 			ipAddress: s.ipAddress,
-			userAgent: s.userAgent
+			userAgent: parseUserAgent(s.userAgent)
 		}))
 	};
 };
@@ -222,6 +223,27 @@ export const actions: Actions = {
 		}
 
 		return { message: 'Session revoked successfully' };
+	},
+
+	/**
+	 * Revokes all other sessions for the user except the current one.
+	 */
+	revokeOtherSessions: async (event) => {
+		if (!event.locals.session || !event.locals.user) {
+			return fail(401);
+		}
+
+		logger.info('Revoke other sessions action initiated', { userId: event.locals.user.id });
+
+		try {
+			await auth.invalidateOtherSessions(event.locals.user.id, event.locals.session.id);
+			logger.info('Other sessions revoked', { userId: event.locals.user.id });
+		} catch (e) {
+			logger.error('Failed to revoke other sessions', e, { userId: event.locals.user.id });
+			return fail(500, { message: 'An unknown error occurred' });
+		}
+
+		return { message: 'All other sessions revoked successfully' };
 	},
 
 	/**

@@ -84,6 +84,28 @@ export async function createSession(
 }
 
 /**
+ * Invalidates all sessions for a user except the current one.
+ *
+ * @param userId - The ID of the user.
+ * @param currentSessionId - The ID of the current session to keep.
+ * @throws Will throw an error if invalidation fails.
+ */
+export async function invalidateOtherSessions(userId: string, currentSessionId: string) {
+	try {
+		const sessions = await getUserSessions(userId);
+		for (const session of sessions) {
+			if (session.id !== currentSessionId) {
+				await db.delete(table.session).where(eq(table.session.id, session.id));
+			}
+		}
+		logger.info('Other sessions invalidated', { userId, currentSessionId });
+	} catch (error) {
+		logger.error('Failed to invalidate other sessions', error, { userId });
+		throw error;
+	}
+}
+
+/**
  * Retrieves all active sessions for a specific user.
  *
  * @param userId - The unique identifier of the user.
