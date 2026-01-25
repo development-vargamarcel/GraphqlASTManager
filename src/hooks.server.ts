@@ -140,10 +140,12 @@ export const handle: Handle = sequence(
  */
 export const handleError: HandleServerError = ({ error, event }) => {
 	const errorId = crypto.randomUUID();
+	const userId = event.locals.user?.id;
 	logger.error('Unexpected server error', error, {
 		errorId,
 		path: event.url.pathname,
-		method: event.request.method
+		method: event.request.method,
+		userId
 	});
 
 	return {

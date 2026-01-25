@@ -158,8 +158,12 @@
 							min="0"
 							max="150"
 							value={data.user.age ?? ''}
+							aria-invalid={!!errors?.age}
 							class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
 						/>
+						{#if errors?.age}
+							<p class="mt-1 text-sm text-red-600">{errors.age}</p>
+						{/if}
 					</div>
 					<button
 						type="submit"
@@ -212,6 +216,7 @@
 								id="currentPassword"
 								required
 								bind:value={currentPassword}
+								aria-invalid={!!errors?.currentPassword}
 								class="block w-full rounded-md border border-gray-300 px-3 py-2 pr-10 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
 							/>
 							<button
@@ -277,6 +282,7 @@
 								required
 								minlength="6"
 								bind:value={newPassword}
+								aria-invalid={!!errors?.newPassword}
 								class="block w-full rounded-md border border-gray-300 px-3 py-2 pr-10 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
 							/>
 							<button
@@ -327,7 +333,7 @@
 						</div>
 						<!-- Strength Meter -->
 						{#if newPassword.length > 0}
-							<div class="mt-2 flex gap-1">
+							<div class="mt-2 flex gap-1" aria-hidden="true">
 								{#each Array(4) as _, i (i)}
 									<div
 										class="h-1 flex-1 rounded-full transition-colors duration-300 {i < strength
@@ -342,17 +348,19 @@
 									></div>
 								{/each}
 							</div>
-							<p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-								{#if strength <= 1}
-									Weak
-								{:else if strength === 2}
-									Fair
-								{:else if strength === 3}
-									Good
-								{:else}
-									Strong
-								{/if}
-							</p>
+							<div aria-live="polite">
+								<p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+									{#if strength <= 1}
+										Weak
+									{:else if strength === 2}
+										Fair
+									{:else if strength === 3}
+										Good
+									{:else}
+										Strong
+									{/if}
+								</p>
+							</div>
 						{/if}
 						{#if errors?.newPassword}
 							<p class="mt-1 text-sm text-red-600">{errors.newPassword}</p>
@@ -370,6 +378,8 @@
 							id="confirmPassword"
 							required
 							bind:value={confirmPassword}
+							aria-invalid={(!passwordsMatch && confirmPassword.length > 0) ||
+								!!errors?.confirmPassword}
 							class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
 						/>
 						{#if !passwordsMatch && confirmPassword.length > 0}
@@ -471,7 +481,11 @@
 						<p>
 							Once you delete your account, there is no going back. Please be certain.
 							<br />
-							Type <strong class="font-bold">DELETE</strong> to confirm.
+							Type
+							<code
+								class="rounded bg-red-100 px-1 py-0.5 font-mono font-bold text-red-800 dark:bg-red-900 dark:text-red-200"
+								>DELETE</code
+							> to confirm.
 						</p>
 					</div>
 					<div class="mt-4">

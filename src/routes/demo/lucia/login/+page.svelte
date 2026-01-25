@@ -200,7 +200,7 @@
 						</button>
 					</div>
 					{#if password.length > 0}
-						<div class="mt-2 flex gap-1">
+						<div class="mt-2 flex gap-1" aria-hidden="true">
 							{#each Array(4) as _, i (i)}
 								<div
 									class="h-1 flex-1 rounded-full transition-colors duration-300 {i < strength
@@ -215,17 +215,19 @@
 								></div>
 							{/each}
 						</div>
-						<p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-							{#if strength <= 1}
-								Weak
-							{:else if strength === 2}
-								Fair
-							{:else if strength === 3}
-								Good
-							{:else}
-								Strong
-							{/if}
-						</p>
+						<div aria-live="polite">
+							<p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+								{#if strength <= 1}
+									Weak
+								{:else if strength === 2}
+									Fair
+								{:else if strength === 3}
+									Good
+								{:else}
+									Strong
+								{/if}
+							</p>
+						</div>
 					{/if}
 					<p id="password-helper" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
 						Min. 6 characters

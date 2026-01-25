@@ -35,6 +35,7 @@ This is a SvelteKit application featuring custom authentication, SQLite database
 
 ## Testing
 
+- **Verify All**: `npm run verify` (Runs check, lint, and unit tests)
 - **Unit Tests**: `npm run test:unit`
 - **E2E Tests**:
   ```bash
