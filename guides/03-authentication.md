@@ -43,7 +43,7 @@ Authentication is implemented using a custom session-based system. It relies on 
 
 - **Rate Limiting**:
   - Global limit: 100 requests/minute per IP.
-  - Auth endpoints: Stricter limits can be applied to login/register actions.
+  - Auth endpoints: Stricter limits (20 requests/minute) are applied to login/register actions.
 - **CSRF Protection**: SvelteKit's native CSRF protection is enabled for form actions.
 - **Cookie Security**: Cookies are configured to be inaccessible to client-side JS (`httpOnly`).
 
