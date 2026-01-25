@@ -30,12 +30,28 @@ const handleRateLimit: Handle = async ({ event, resolve }) => {
 	}
 
 	const clientIp = event.getClientAddress();
-	if (!globalLimiter.check(clientIp)) {
+	const allowed = globalLimiter.check(clientIp);
+	const remaining = globalLimiter.getRemaining(clientIp);
+	const resetTime = globalLimiter.getResetTime(clientIp);
+
+	if (!allowed) {
 		logger.warn('Rate limit exceeded', { ip: clientIp, path: event.url.pathname });
-		return new Response('Too many requests', { status: 429 });
+		return new Response('Too many requests', {
+			status: 429,
+			headers: {
+				'X-RateLimit-Limit': '100',
+				'X-RateLimit-Remaining': remaining.toString(),
+				'X-RateLimit-Reset': Math.ceil(resetTime / 1000).toString()
+			}
+		});
 	}
 
-	return resolve(event);
+	const response = await resolve(event);
+	response.headers.set('X-RateLimit-Limit', '100');
+	response.headers.set('X-RateLimit-Remaining', remaining.toString());
+	response.headers.set('X-RateLimit-Reset', Math.ceil(resetTime / 1000).toString());
+
+	return response;
 };
 
 /**

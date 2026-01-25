@@ -68,6 +68,10 @@ The dashboard (`/demo/lucia`) allows authenticated users to manage their account
 
 - **Global**: Applied in `src/hooks.server.ts` (100 req/min per IP) to protect the app.
 - **Auth Routes**: Stricter limit (20 req/min per IP) in login/register actions to prevent brute-force attacks.
+- **Headers**: Responses include rate limit information:
+  - `X-RateLimit-Limit`: Maximum requests allowed in the window.
+  - `X-RateLimit-Remaining`: Remaining requests.
+  - `X-RateLimit-Reset`: Unix timestamp when the limit resets.
 
 ## Setup Instructions
 
