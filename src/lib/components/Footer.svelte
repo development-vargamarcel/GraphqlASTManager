@@ -16,7 +16,7 @@
 			} else {
 				systemStatus = 'error';
 			}
-		} catch (e) {
+		} catch (_e) {
 			systemStatus = 'error';
 		}
 	});
