@@ -58,4 +58,5 @@ The dashboard (`/demo/lucia`) provides authenticated users with account manageme
   - **Password Visibility**: Both "New Password" and "Current Password" fields include a toggle to show/hide the password text for better usability.
   - **Password Strength**: A real-time strength meter provides feedback on the new password complexity.
   - **Active Sessions**: Users can view a list of all active sessions, including IP address and User Agent. They can revoke any session other than the current one.
+  - **Revoke All Sessions**: Users can sign out from all devices simultaneously (including the current session) by using "Sign out everywhere".
 - **Danger Zone**: Users can permanently delete their account. This action requires an explicit confirmation by typing "DELETE".

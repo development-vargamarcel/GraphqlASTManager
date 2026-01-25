@@ -74,3 +74,25 @@ describe('invalidateOtherSessions', () => {
 		expect(db.delete).not.toHaveBeenCalled();
 	});
 });
+
+describe('invalidateAllUserSessions', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it('should invalidate all sessions for a user', async () => {
+		const userId = 'user-123';
+
+		// Mock delete to return a chainable object
+		(db.delete as any).mockReturnValue({
+			where: vi.fn().mockResolvedValue(undefined)
+		});
+
+		await auth.invalidateAllUserSessions(userId);
+
+		// Expect db.delete to be called once with correct where clause
+		expect(db.delete).toHaveBeenCalledTimes(1);
+		// Note: We can't easily check the where clause arguments without more complex mocking,
+		// but checking that delete is called is a good start.
+	});
+});

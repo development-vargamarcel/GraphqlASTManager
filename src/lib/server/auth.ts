@@ -106,6 +106,22 @@ export async function invalidateOtherSessions(userId: string, currentSessionId: 
 }
 
 /**
+ * Invalidates all sessions for a specific user.
+ *
+ * @param userId - The ID of the user.
+ * @throws Will throw an error if invalidation fails.
+ */
+export async function invalidateAllUserSessions(userId: string) {
+	try {
+		await db.delete(table.session).where(eq(table.session.userId, userId));
+		logger.info('All user sessions invalidated', { userId });
+	} catch (error) {
+		logger.error('Failed to invalidate all user sessions', error, { userId });
+		throw error;
+	}
+}
+
+/**
  * Retrieves all active sessions for a specific user.
  *
  * @param userId - The unique identifier of the user.
