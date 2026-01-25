@@ -60,11 +60,15 @@ const handleRateLimit: Handle = async ({ event, resolve }) => {
  */
 const handleLogging: Handle = async ({ event, resolve }) => {
 	const start = Date.now();
+	event.locals.requestId = crypto.randomUUID();
 	const response = await resolve(event);
 	const duration = Date.now() - start;
 
+	response.headers.set('X-Request-ID', event.locals.requestId);
+
 	if (!isStaticAsset(event.url.pathname)) {
 		logger.info('Request processed', {
+			requestId: event.locals.requestId,
 			method: event.request.method,
 			path: event.url.pathname,
 			status: response.status,

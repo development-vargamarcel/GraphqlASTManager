@@ -73,6 +73,11 @@ The dashboard (`/demo/lucia`) allows authenticated users to manage their account
   - `X-RateLimit-Remaining`: Remaining requests.
   - `X-RateLimit-Reset`: Unix timestamp when the limit resets.
 
+### Observability
+
+- **Request ID**: Every request is assigned a unique `X-Request-ID` header for tracing.
+- **System Status**: A visual indicator in the footer checks the `/api/health` endpoint.
+
 ## Setup Instructions
 
 1.  **Install dependencies**:
