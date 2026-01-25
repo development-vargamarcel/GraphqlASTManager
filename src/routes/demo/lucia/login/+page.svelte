@@ -118,7 +118,7 @@
 						autofocus
 						minlength="3"
 						maxlength="31"
-						pattern="[a-zA-Z0-9_-]+"
+						pattern="^[-a-zA-Z0-9_]+$"
 						title="Username must be 3-31 characters long and can only contain letters, numbers, underscores, and hyphens."
 						aria-invalid={!!formErrors.username}
 						aria-describedby="username-helper {formErrors.username ? 'username-error' : ''}"
