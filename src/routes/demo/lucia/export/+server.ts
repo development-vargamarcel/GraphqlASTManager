@@ -6,6 +6,10 @@ import type { RequestHandler } from './$types.js';
 
 const logger = new Logger('export-data');
 
+/**
+ * Handles the data export request.
+ * Authenticated users can download their profile and session history as a JSON file.
+ */
 export const GET: RequestHandler = async (event) => {
 	if (!event.locals.user) {
 		logger.warn('Unauthorized export attempt');
