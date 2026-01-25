@@ -20,6 +20,7 @@ export const load: PageServerLoad = async (event) => {
 	logger.debug('Loading user profile', { userId: user.id });
 
 	// Fetch fresh user data to get the age
+	logger.debug('Fetching fresh user data', { userId: user.id });
 	const freshUser = await userFn.getUserById(user.id);
 	if (!freshUser) {
 		logger.warn('User found in session but not in DB', { userId: user.id });
