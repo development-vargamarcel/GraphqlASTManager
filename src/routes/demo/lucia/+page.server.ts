@@ -2,6 +2,7 @@ import * as auth from '$lib/server/auth.js';
 import * as userFn from '$lib/server/user.js';
 import * as validation from '$lib/server/validation.js';
 import { Logger } from '$lib/server/logger.js';
+import { parseUserAgent } from '$lib/server/ua.js';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types.js';
 
@@ -43,7 +44,7 @@ export const load: PageServerLoad = async (event) => {
 			id: s.id,
 			expiresAt: s.expiresAt,
 			ipAddress: s.ipAddress,
-			userAgent: s.userAgent
+			userAgent: parseUserAgent(s.userAgent)
 		}))
 	};
 };
