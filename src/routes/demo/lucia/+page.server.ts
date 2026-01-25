@@ -82,7 +82,10 @@ export const actions: Actions = {
 
 		if (!ageStr || typeof ageStr !== 'string') {
 			logger.debug('Update profile failed: invalid age format', { userId: event.locals.user.id });
-			return fail(400, { message: 'Invalid age provided' });
+			return fail(400, {
+				message: 'Invalid age provided',
+				errors: { age: 'Invalid age provided' }
+			});
 		}
 
 		const age = parseInt(ageStr, 10);
@@ -91,7 +94,10 @@ export const actions: Actions = {
 				userId: event.locals.user.id,
 				age
 			});
-			return fail(400, { message: 'Invalid age provided' });
+			return fail(400, {
+				message: 'Invalid age provided',
+				errors: { age: 'Invalid age provided' }
+			});
 		}
 
 		try {
