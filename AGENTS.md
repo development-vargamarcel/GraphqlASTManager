@@ -60,6 +60,10 @@ The dashboard (`/demo/lucia`) allows authenticated users to manage their account
     - Delete account.
     - Requires user to type "DELETE" to confirm the action.
 
+4.  **Data Export**:
+    - "Download My Data" button in the Profile tab.
+    - Exports user profile and session history as a JSON file.
+
 ### Rate Limiting
 
 - **Global**: Applied in `src/hooks.server.ts` (100 req/min per IP) to protect the app.
