@@ -69,7 +69,7 @@
 					class="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
 					onclick={() => {
 						navigator.clipboard.writeText(data.user.id);
-						toastState.add('User ID copied to clipboard', 'success');
+						toastState.add('User ID copied!', 'success');
 					}}
 					aria-label="Copy User ID"
 					title="Copy User ID to clipboard"
@@ -404,9 +404,39 @@
 				</form>
 
 				<div class="border-t border-gray-200 pt-6 dark:border-gray-700">
-					<h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-						Active Sessions
-					</h3>
+					<div class="flex items-center justify-between">
+						<h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+							Active Sessions
+						</h3>
+						{#if data.sessions.length > 1}
+							<form
+								method="post"
+								action="?/revokeOtherSessions"
+								use:enhance={() => {
+									loadingAction = 'revokeOtherSessions';
+									return async ({ update, result }) => {
+										loadingAction = null;
+										if (result.type === 'success') {
+											toastState.add('All other sessions revoked', 'success');
+										}
+										await update();
+									};
+								}}
+							>
+								<button
+									type="submit"
+									disabled={loadingAction === 'revokeOtherSessions'}
+									class="inline-flex items-center rounded border border-transparent bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-200 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
+								>
+									{#if loadingAction === 'revokeOtherSessions'}
+										Revoking...
+									{:else}
+										Revoke Others
+									{/if}
+								</button>
+							</form>
+						{/if}
+					</div>
 					<div
 						class="mt-4 overflow-hidden rounded-md border border-gray-200 shadow-sm dark:border-gray-700"
 					>
@@ -424,11 +454,14 @@
 												<span
 													class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200"
 												>
-													Current
+													Current Session
 												</span>
 											{/if}
 										</div>
-										<p class="mt-1 truncate text-xs text-gray-500 dark:text-gray-400">
+										<p
+											class="mt-1 truncate text-xs text-gray-500 dark:text-gray-400"
+											title={session.userAgent}
+										>
 											{session.userAgent || 'Unknown User Agent'}
 										</p>
 										<p class="mt-1 text-xs text-gray-400 dark:text-gray-500">

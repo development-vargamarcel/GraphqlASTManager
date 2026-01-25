@@ -225,6 +225,27 @@ export const actions: Actions = {
 	},
 
 	/**
+	 * Revokes all other sessions for the user except the current one.
+	 */
+	revokeOtherSessions: async (event) => {
+		if (!event.locals.session || !event.locals.user) {
+			return fail(401);
+		}
+
+		logger.info('Revoke other sessions action initiated', { userId: event.locals.user.id });
+
+		try {
+			await auth.invalidateOtherSessions(event.locals.user.id, event.locals.session.id);
+			logger.info('Other sessions revoked', { userId: event.locals.user.id });
+		} catch (e) {
+			logger.error('Failed to revoke other sessions', e, { userId: event.locals.user.id });
+			return fail(500, { message: 'An unknown error occurred' });
+		}
+
+		return { message: 'All other sessions revoked successfully' };
+	},
+
+	/**
 	 * Deletes the user's account permanently.
 	 * Requires the user to type "DELETE" to confirm.
 	 */
