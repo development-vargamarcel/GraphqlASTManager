@@ -22,7 +22,9 @@ export const session = sqliteTable(
 		userId: text('user_id')
 			.notNull()
 			.references(() => user.id),
-		expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull()
+		expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+		ipAddress: text('ip_address'),
+		userAgent: text('user_agent')
 	},
 	(table) => {
 		return {

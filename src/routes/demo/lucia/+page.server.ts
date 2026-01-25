@@ -30,12 +30,21 @@ export const load: PageServerLoad = async (event) => {
 	// The current user object in locals is safe, let's see what getUserById returns.
 	// It returns the whole row. We should probably only return safe fields.
 	// However, locals.user only has id and username.
+	const sessions = await auth.getUserSessions(user.id);
+
 	return {
 		user: {
 			id: freshUser.id,
 			username: freshUser.username,
 			age: freshUser.age
-		}
+		},
+		currentSessionId: event.locals.session?.id,
+		sessions: sessions.map((s) => ({
+			id: s.id,
+			expiresAt: s.expiresAt,
+			ipAddress: s.ipAddress,
+			userAgent: s.userAgent
+		}))
 	};
 };
 
@@ -163,6 +172,50 @@ export const actions: Actions = {
 		}
 
 		return { message: 'Password updated successfully' };
+	},
+
+	/**
+	 * Revokes a specific session.
+	 * Ensures the session belongs to the current user before invalidating.
+	 */
+	revokeSession: async (event) => {
+		if (!event.locals.session || !event.locals.user) {
+			return fail(401);
+		}
+
+		const formData = await event.request.formData();
+		const sessionId = formData.get('sessionId');
+
+		if (!sessionId || typeof sessionId !== 'string') {
+			return fail(400, { message: 'Invalid session ID' });
+		}
+
+		logger.info('Revoke session action initiated', {
+			userId: event.locals.user.id,
+			targetSessionId: sessionId
+		});
+
+		// Verify ownership
+		const userSessions = await auth.getUserSessions(event.locals.user.id);
+		const isOwner = userSessions.some((s) => s.id === sessionId);
+
+		if (!isOwner) {
+			logger.warn('Unauthorized session revocation attempt', {
+				userId: event.locals.user.id,
+				targetSessionId: sessionId
+			});
+			return fail(403, { message: 'Unauthorized' });
+		}
+
+		try {
+			await auth.invalidateSession(sessionId);
+			logger.info('Session revoked', { userId: event.locals.user.id, sessionId });
+		} catch (e) {
+			logger.error('Failed to revoke session', e, { userId: event.locals.user.id, sessionId });
+			return fail(500, { message: 'An unknown error occurred' });
+		}
+
+		return { message: 'Session revoked successfully' };
 	},
 
 	/**

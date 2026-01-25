@@ -392,6 +392,75 @@
 						{/if}
 					</button>
 				</form>
+
+				<div class="border-t border-gray-200 pt-6 dark:border-gray-700">
+					<h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+						Active Sessions
+					</h3>
+					<div
+						class="mt-4 overflow-hidden rounded-md border border-gray-200 shadow-sm dark:border-gray-700"
+					>
+						<ul class="divide-y divide-gray-200 dark:divide-gray-700">
+							{#each data.sessions as session (session.id)}
+								<li
+									class="flex items-center justify-between bg-white px-4 py-4 sm:px-6 dark:bg-gray-800"
+								>
+									<div class="flex-1 truncate">
+										<div class="flex items-center space-x-3">
+											<p class="truncate text-sm font-medium text-gray-900 dark:text-white">
+												{session.ipAddress || 'Unknown IP'}
+											</p>
+											{#if session.id === data.currentSessionId}
+												<span
+													class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200"
+												>
+													Current
+												</span>
+											{/if}
+										</div>
+										<p class="mt-1 truncate text-xs text-gray-500 dark:text-gray-400">
+											{session.userAgent || 'Unknown User Agent'}
+										</p>
+										<p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+											Expires: {new Date(session.expiresAt).toLocaleDateString()}
+										</p>
+									</div>
+									<div>
+										{#if session.id !== data.currentSessionId}
+											<form
+												method="post"
+												action="?/revokeSession"
+												use:enhance={() => {
+													loadingAction = `revoke-${session.id}`;
+													return async ({ update, result }) => {
+														loadingAction = null;
+														if (result.type === 'success') {
+															toastState.add('Session revoked', 'success');
+														}
+														await update();
+													};
+												}}
+											>
+												<input type="hidden" name="sessionId" value={session.id} />
+												<button
+													type="submit"
+													disabled={loadingAction === `revoke-${session.id}`}
+													class="inline-flex items-center rounded border border-transparent bg-red-100 px-2.5 py-1.5 text-xs font-medium text-red-700 hover:bg-red-200 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
+												>
+													{#if loadingAction === `revoke-${session.id}`}
+														Revoking...
+													{:else}
+														Revoke
+													{/if}
+												</button>
+											</form>
+										{/if}
+									</div>
+								</li>
+							{/each}
+						</ul>
+					</div>
+				</div>
 			{:else if activeTab === 'danger'}
 				<h2 class="mb-4 text-xl font-semibold text-red-600 dark:text-red-400">Danger Zone</h2>
 				<div

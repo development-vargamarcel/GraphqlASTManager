@@ -12,7 +12,7 @@ Authentication is implemented using a custom session-based system. It relies on 
 
 - **Database Tables**:
   - `user`: Stores user credentials (hashed password) and profile data.
-  - `session`: Stores active sessions, linked to users.
+  - `session`: Stores active sessions, linked to users, including metadata (IP, User Agent).
 
 ## Authentication Flow
 
@@ -57,4 +57,5 @@ The dashboard (`/demo/lucia`) provides authenticated users with account manageme
   - **Change Password**: Users can update their password. This requires entering the current password for verification.
   - **Password Visibility**: Both "New Password" and "Current Password" fields include a toggle to show/hide the password text for better usability.
   - **Password Strength**: A real-time strength meter provides feedback on the new password complexity.
+  - **Active Sessions**: Users can view a list of all active sessions, including IP address and User Agent. They can revoke any session other than the current one.
 - **Danger Zone**: Users can permanently delete their account. This action requires an explicit confirmation by typing "DELETE".

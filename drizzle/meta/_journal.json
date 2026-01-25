@@ -15,6 +15,13 @@
       "when": 1768806729074,
       "tag": "0001_adorable_shaman",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1769332962282,
+      "tag": "0002_pretty_franklin_storm",
+      "breakpoints": true
     }
   ]
 }
