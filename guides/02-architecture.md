@@ -31,6 +31,7 @@ src/
 ### Server Logic (`src/lib/server`)
 
 - **`auth.ts`**: Handles session creation, validation, and password hashing.
+- **`activity.ts`**: specific for handling user activity logs.
 - **`db/`**: Contains database configuration and schema definitions.
 - **`logger.ts`**: A structured logger for consistent server-side logging.
 - **`rate-limiter.ts`**: In-memory rate limiting utility.

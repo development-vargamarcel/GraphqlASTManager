@@ -35,6 +35,28 @@ export const session = sqliteTable(
 );
 
 /**
+ * Activity Log table definition.
+ * Stores user activity history for security and auditing.
+ */
+export const activityLog = sqliteTable(
+	'activity_log',
+	{
+		id: text('id').primaryKey(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => user.id),
+		action: text('action').notNull(),
+		details: text('details'),
+		timestamp: integer('timestamp', { mode: 'timestamp' }).notNull()
+	},
+	(table) => {
+		return {
+			activityUserIdIdx: index('activity_log_user_id_idx').on(table.userId)
+		};
+	}
+);
+
+/**
  * Type definition for a Session object inferred from the schema.
  */
 export type Session = typeof session.$inferSelect;
@@ -43,3 +65,8 @@ export type Session = typeof session.$inferSelect;
  * Type definition for a User object inferred from the schema.
  */
 export type User = typeof user.$inferSelect;
+
+/**
+ * Type definition for an Activity Log object inferred from the schema.
+ */
+export type ActivityLog = typeof activityLog.$inferSelect;

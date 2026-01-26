@@ -22,6 +22,13 @@ The schema is defined in `src/lib/server/db/schema.ts`.
     - `expiresAt`: Timestamp (Integer).
     - **Indexes**: explicit index on `userId` for faster lookups.
 
+3.  **Activity Log (`activity_log`)**
+    - `id`: Text, Primary Key (Random 160-bit ID).
+    - `userId`: Text, Foreign Key to `user.id`.
+    - `action`: Text (e.g., 'LOGIN', 'UPDATE_PROFILE').
+    - `details`: Text (JSON string).
+    - `timestamp`: Timestamp.
+
 ## Migrations
 
 We use **Drizzle Kit** to manage schema changes.

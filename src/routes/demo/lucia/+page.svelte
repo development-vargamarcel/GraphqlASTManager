@@ -116,6 +116,14 @@
 					Security
 				</button>
 				<button
+					onclick={() => (activeTab = 'activity')}
+					class="{activeTab === 'activity'
+						? 'border-blue-500 text-blue-600 dark:text-blue-400'
+						: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'} border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap"
+				>
+					Activity
+				</button>
+				<button
 					onclick={() => (activeTab = 'danger')}
 					data-testid="danger-tab"
 					class="{activeTab === 'danger'
@@ -586,6 +594,63 @@
 								</li>
 							{/each}
 						</ul>
+					</div>
+				</div>
+			{:else if activeTab === 'activity'}
+				<h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">Activity Log</h2>
+				<div
+					class="overflow-hidden rounded-md border border-gray-200 shadow-sm dark:border-gray-700"
+				>
+					<div class="overflow-x-auto">
+						<table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+							<thead class="bg-gray-50 dark:bg-gray-700">
+								<tr>
+									<th
+										scope="col"
+										class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300"
+										>Action</th
+									>
+									<th
+										scope="col"
+										class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300"
+										>Date</th
+									>
+									<th
+										scope="col"
+										class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300"
+										>Details</th
+									>
+								</tr>
+							</thead>
+							<tbody
+								class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800"
+							>
+								{#each data.activityLogs as log}
+									<tr>
+										<td
+											class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-white"
+											>{log.action}</td
+										>
+										<td
+											class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
+											>{new Date(log.timestamp).toLocaleString()}</td
+										>
+										<td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+											<pre class="max-w-xs overflow-auto whitespace-pre-wrap font-mono text-xs"
+												>{log.details || '-'}</pre>
+										</td>
+									</tr>
+								{:else}
+									<tr>
+										<td
+											colspan="3"
+											class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400"
+											>No activity recorded.</td
+										>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
 					</div>
 				</div>
 			{:else if activeTab === 'danger'}
