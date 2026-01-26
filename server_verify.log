@@ -1,0 +1,17 @@
+
+> graphqlastmanager@0.0.1 dev
+> vite dev
+
+✔ [paraglide-js] Compilation complete (locale-modules)
+
+  VITE v7.1.10  ready in 5123 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+{"timestamp":"2026-01-26T07:32:04.657Z","level":"INFO","context":"db","message":"Database client initialized (dev mode)"}
+{"timestamp":"2026-01-26T07:32:04.744Z","level":"DEBUG","context":"hooks","message":"No session token found in request","path":"/"}
+{"timestamp":"2026-01-26T07:32:05.689Z","level":"INFO","context":"hooks","message":"Request processed","requestId":"c513aab5-5865-43f7-b0ed-df16b8da80db","method":"GET","path":"/","status":200,"duration":949,"ip":"::1"}
+{"timestamp":"2026-01-26T07:32:06.128Z","level":"DEBUG","context":"hooks","message":"No session token found in request","path":"/demo/lucia/login"}
+{"timestamp":"2026-01-26T07:32:06.288Z","level":"INFO","context":"hooks","message":"Request processed","requestId":"9a61aa69-6c32-4b61-8aaa-2b7a39a4cf30","method":"GET","path":"/demo/lucia/login","status":200,"duration":160,"ip":"::1"}
+{"timestamp":"2026-01-26T07:32:06.468Z","level":"DEBUG","context":"hooks","message":"No session token found in request","path":"/demo/paraglide"}
+{"timestamp":"2026-01-26T07:32:06.664Z","level":"INFO","context":"hooks","message":"Request processed","requestId":"63f463d6-ce6c-44ba-88ab-a8144c6f5b51","method":"GET","path":"/demo/paraglide","status":200,"duration":196,"ip":"::1"}
