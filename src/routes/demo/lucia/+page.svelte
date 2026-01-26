@@ -55,6 +55,9 @@
 	let errors = $derived(
 		form && typeof form === 'object' && 'errors' in form ? (form as any).errors : {}
 	);
+	let message = $derived(
+		form && typeof form === 'object' && 'message' in form ? (form as any).message : null
+	);
 </script>
 
 <div class="flex min-h-[calc(100vh-12rem)] items-center justify-center py-12">
