@@ -67,3 +67,18 @@ export async function getUserActivity(userId: string, limit = 50): Promise<Activ
 		return [];
 	}
 }
+
+/**
+ * Clears the activity log for a user.
+ *
+ * @param userId - The ID of the user.
+ */
+export async function clearUserActivity(userId: string): Promise<void> {
+	try {
+		await db.delete(table.activityLog).where(eq(table.activityLog.userId, userId));
+		logger.info('User activity cleared', { userId });
+	} catch (error) {
+		logger.error('Failed to clear user activity', error, { userId });
+		throw error;
+	}
+}

@@ -1,7 +1,7 @@
 import * as auth from '$lib/server/auth.js';
 import * as userFn from '$lib/server/user.js';
 import * as validation from '$lib/server/validation.js';
-import { logActivity, getUserActivity } from '$lib/server/activity.js';
+import { logActivity, getUserActivity, clearUserActivity } from '$lib/server/activity.js';
 import { Logger } from '$lib/server/logger.js';
 import { parseUserAgent } from '$lib/server/ua.js';
 import { fail, redirect } from '@sveltejs/kit';
@@ -123,7 +123,10 @@ export const actions: Actions = {
 				await userFn.updateUserBio(event.locals.user.id, bio);
 			}
 			logger.info('User profile updated', { userId: event.locals.user.id, age });
-			await logActivity(event.locals.user.id, 'UPDATE_PROFILE', { age, bioUpdated: typeof bio === 'string' });
+			await logActivity(event.locals.user.id, 'UPDATE_PROFILE', {
+				age,
+				bioUpdated: typeof bio === 'string'
+			});
 		} catch (e) {
 			logger.error('Failed to update user profile', e, { userId: event.locals.user.id });
 			return fail(500, { message: 'An unknown error occurred' });
@@ -324,5 +327,26 @@ export const actions: Actions = {
 		}
 
 		return redirect(302, '/demo/lucia/login');
+	},
+
+	/**
+	 * Clears the user's activity log.
+	 */
+	clearActivityLog: async (event) => {
+		if (!event.locals.session || !event.locals.user) {
+			return fail(401);
+		}
+
+		logger.info('Clear activity log action initiated', { userId: event.locals.user.id });
+
+		try {
+			await clearUserActivity(event.locals.user.id);
+			await logActivity(event.locals.user.id, 'ACTIVITY_LOG_CLEARED');
+		} catch (e) {
+			logger.error('Failed to clear activity log', e, { userId: event.locals.user.id });
+			return fail(500, { message: 'An unknown error occurred' });
+		}
+
+		return { message: 'Activity log cleared' };
 	}
 };

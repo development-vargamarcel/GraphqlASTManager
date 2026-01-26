@@ -597,7 +597,35 @@
 					</div>
 				</div>
 			{:else if activeTab === 'activity'}
-				<h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">Activity Log</h2>
+				<div class="mb-4 flex items-center justify-between">
+					<h2 class="text-xl font-semibold text-gray-900 dark:text-white">Activity Log</h2>
+					<form
+						method="post"
+						action="?/clearActivityLog"
+						use:enhance={() => {
+							loadingAction = 'clearActivityLog';
+							return async ({ update, result }) => {
+								loadingAction = null;
+								if (result.type === 'success') {
+									toastState.add('Activity log cleared', 'success');
+								}
+								await update();
+							};
+						}}
+					>
+						<button
+							type="submit"
+							disabled={loadingAction === 'clearActivityLog' || data.activityLogs.length === 0}
+							class="inline-flex items-center rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+						>
+							{#if loadingAction === 'clearActivityLog'}
+								Clearing...
+							{:else}
+								Clear History
+							{/if}
+						</button>
+					</form>
+				</div>
 				<div
 					class="overflow-hidden rounded-md border border-gray-200 shadow-sm dark:border-gray-700"
 				>
@@ -607,17 +635,17 @@
 								<tr>
 									<th
 										scope="col"
-										class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300"
+										class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
 										>Action</th
 									>
 									<th
 										scope="col"
-										class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300"
+										class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
 										>Date</th
 									>
 									<th
 										scope="col"
-										class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300"
+										class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
 										>Details</th
 									>
 								</tr>
@@ -627,17 +655,16 @@
 							>
 								{#each data.activityLogs as log}
 									<tr>
-										<td
-											class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-white"
+										<td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-white"
 											>{log.action}</td
 										>
-										<td
-											class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
+										<td class="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
 											>{new Date(log.timestamp).toLocaleString()}</td
 										>
 										<td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-											<pre class="max-w-xs overflow-auto whitespace-pre-wrap font-mono text-xs"
-												>{log.details || '-'}</pre>
+											<pre
+												class="max-w-xs overflow-auto font-mono text-xs whitespace-pre-wrap">{log.details ||
+													'-'}</pre>
 										</td>
 									</tr>
 								{:else}

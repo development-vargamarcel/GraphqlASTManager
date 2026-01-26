@@ -7,7 +7,8 @@ import * as table from '$lib/server/db/schema.js';
 vi.mock('$lib/server/db/index.js', () => ({
 	db: {
 		insert: vi.fn(),
-		select: vi.fn()
+		select: vi.fn(),
+		delete: vi.fn()
 	}
 }));
 
@@ -96,6 +97,25 @@ describe('activity', () => {
 
 			const result = await activity.getUserActivity('u1');
 			expect(result).toEqual([]);
+		});
+	});
+
+	describe('clearUserActivity', () => {
+		it('should clear user activity', async () => {
+			const mockWhere = vi.fn().mockResolvedValue(undefined);
+			vi.mocked(db.delete).mockReturnValue({ where: mockWhere } as any);
+
+			await activity.clearUserActivity('u1');
+
+			expect(db.delete).toHaveBeenCalledWith(table.activityLog);
+			expect(mockWhere).toHaveBeenCalled();
+		});
+
+		it('should throw error if db fails', async () => {
+			const mockWhere = vi.fn().mockRejectedValue(new Error('DB Error'));
+			vi.mocked(db.delete).mockReturnValue({ where: mockWhere } as any);
+
+			await expect(activity.clearUserActivity('u1')).rejects.toThrow('DB Error');
 		});
 	});
 });
