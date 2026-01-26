@@ -63,7 +63,8 @@ export async function createUser(
 		id,
 		username: normalizedUsername,
 		passwordHash,
-		age: null
+		age: null,
+		bio: null
 	};
 	try {
 		await db.insert(table.user).values(user);
@@ -88,6 +89,23 @@ export async function updateUserAge(userId: string, age: number): Promise<void> 
 		logger.info('User age updated', { userId, age });
 	} catch (error) {
 		logger.error('Failed to update user age', error, { userId, age });
+		throw error;
+	}
+}
+
+/**
+ * Updates the bio of a specific user.
+ *
+ * @param userId - The unique identifier of the user.
+ * @param bio - The new bio to set.
+ * @throws Will throw an error if the update fails.
+ */
+export async function updateUserBio(userId: string, bio: string): Promise<void> {
+	try {
+		await db.update(table.user).set({ bio }).where(eq(table.user.id, userId));
+		logger.info('User bio updated', { userId });
+	} catch (error) {
+		logger.error('Failed to update user bio', error, { userId });
 		throw error;
 	}
 }

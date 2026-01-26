@@ -75,14 +75,16 @@ describe('user', () => {
 				id,
 				username,
 				passwordHash,
-				age: null
+				age: null,
+				bio: null
 			});
 			expect(db.insert).toHaveBeenCalledWith(table.user);
 			expect(mockValues).toHaveBeenCalledWith({
 				id,
 				username,
 				passwordHash,
-				age: null
+				age: null,
+				bio: null
 			});
 		});
 
@@ -183,6 +185,26 @@ describe('user', () => {
 			vi.mocked(db.delete).mockReturnValue({ where: mockWhere } as any);
 
 			await expect(user.deleteUser('1')).rejects.toThrow('DB Error');
+		});
+	});
+
+	describe('updateUserBio', () => {
+		it('should update user bio', async () => {
+			const mockSet = vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) });
+			vi.mocked(db.update).mockReturnValue({ set: mockSet } as any);
+
+			await user.updateUserBio('1', 'New bio');
+			expect(db.update).toHaveBeenCalledWith(table.user);
+			expect(mockSet).toHaveBeenCalledWith({ bio: 'New bio' });
+		});
+
+		it('should throw error if db fails', async () => {
+			const mockSet = vi
+				.fn()
+				.mockReturnValue({ where: vi.fn().mockRejectedValue(new Error('DB Error')) });
+			vi.mocked(db.update).mockReturnValue({ set: mockSet } as any);
+
+			await expect(user.updateUserBio('1', 'New bio')).rejects.toThrow('DB Error');
 		});
 	});
 });

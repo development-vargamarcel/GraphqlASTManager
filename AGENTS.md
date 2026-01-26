@@ -19,7 +19,7 @@ This project is a SvelteKit application using Drizzle ORM, custom authentication
 
 ## Database Schema
 
-- **User**: `id` (text, PK), `username` (text, unique), `passwordHash` (text), `age` (int).
+- **User**: `id` (text, PK), `username` (text, unique), `passwordHash` (text), `age` (int), `bio` (text).
 - **Session**: `id` (text, PK), `userId` (text, FK), `expiresAt` (int/timestamp).
 
 ## Key Flows
@@ -51,6 +51,7 @@ The dashboard (`/demo/lucia`) allows authenticated users to manage their account
 1.  **Profile**:
     - View basic user info (ID, Username).
     - Update Age.
+    - Update Bio.
 
 2.  **Security**:
     - Change password. Requires current password verification.

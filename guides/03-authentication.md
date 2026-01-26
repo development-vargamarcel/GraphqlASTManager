@@ -51,7 +51,7 @@ Authentication is implemented using a custom session-based system. It relies on 
 
 The dashboard (`/demo/lucia`) provides authenticated users with account management tools:
 
-- **Profile Management**: Users can update their profile information (e.g., Age).
+- **Profile Management**: Users can update their profile information (e.g., Age, Bio).
 - **Copy User ID**: A convenient button next to the User ID allows users to quickly copy their unique identifier to the clipboard.
 - **Security Settings**:
   - **Change Password**: Users can update their password. This requires entering the current password for verification.
