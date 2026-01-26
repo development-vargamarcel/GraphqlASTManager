@@ -1,6 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import * as auth from '$lib/server/auth.js';
 import * as userModel from '$lib/server/user.js';
+import { logActivity } from '$lib/server/activity.js';
 import { RateLimiter } from '$lib/server/rate-limiter.js';
 import { validateUsername, validatePassword } from '$lib/server/validation.js';
 import type { Actions, PageServerLoad } from './$types.js';
@@ -92,6 +93,8 @@ export const actions: Actions = {
 			ip: clientIp
 		});
 
+		await logActivity(existingUser.id, 'LOGIN', { ip: clientIp, userAgent });
+
 		return redirect(302, '/demo/lucia');
 	},
 	/**
@@ -140,6 +143,9 @@ export const actions: Actions = {
 			auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
 
 			logger.info('User registered', { userId, username: validUsername, ip: clientIp });
+
+			await logActivity(userId, 'REGISTER', { ip: clientIp, userAgent });
+			await logActivity(userId, 'LOGIN', { ip: clientIp, userAgent });
 		} catch (e: any) {
 			if (e.code === 'SQLITE_CONSTRAINT_UNIQUE') {
 				return fail(400, {

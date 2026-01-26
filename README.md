@@ -7,6 +7,7 @@ This is a SvelteKit application featuring custom authentication, SQLite database
 - **SvelteKit**: Full-stack framework.
 - **Drizzle ORM**: Type-safe database interaction with SQLite.
 - **Authentication**: Custom session-based auth with Argon2 hashing.
+- **Activity Logs**: Track user actions for security and auditability.
 - **Localization**: Paraglide JS.
 - **Tailwind CSS**: Utility-first styling.
 

@@ -1,6 +1,7 @@
 import * as auth from '$lib/server/auth.js';
 import * as userFn from '$lib/server/user.js';
 import * as validation from '$lib/server/validation.js';
+import { logActivity, getUserActivity, clearUserActivity } from '$lib/server/activity.js';
 import { Logger } from '$lib/server/logger.js';
 import { parseUserAgent } from '$lib/server/ua.js';
 import { fail, redirect } from '@sveltejs/kit';
@@ -32,6 +33,7 @@ export const load: PageServerLoad = async (event) => {
 	// It returns the whole row. We should probably only return safe fields.
 	// However, locals.user only has id and username.
 	const sessions = await auth.getUserSessions(user.id);
+	const activityLogs = await getUserActivity(user.id);
 
 	return {
 		user: {
@@ -46,7 +48,8 @@ export const load: PageServerLoad = async (event) => {
 			expiresAt: s.expiresAt,
 			ipAddress: s.ipAddress,
 			userAgent: parseUserAgent(s.userAgent)
-		}))
+		})),
+		activityLogs
 	};
 };
 
@@ -65,6 +68,7 @@ export const actions: Actions = {
 		auth.deleteSessionTokenCookie(event);
 
 		logger.info('User logged out', { userId: event.locals.user?.id });
+		await logActivity(event.locals.user.id, 'LOGOUT');
 
 		return redirect(302, '/demo/lucia/login');
 	},
@@ -119,6 +123,10 @@ export const actions: Actions = {
 				await userFn.updateUserBio(event.locals.user.id, bio);
 			}
 			logger.info('User profile updated', { userId: event.locals.user.id, age });
+			await logActivity(event.locals.user.id, 'UPDATE_PROFILE', {
+				age,
+				bioUpdated: typeof bio === 'string'
+			});
 		} catch (e) {
 			logger.error('Failed to update user profile', e, { userId: event.locals.user.id });
 			return fail(500, { message: 'An unknown error occurred' });
@@ -188,6 +196,7 @@ export const actions: Actions = {
 			const passwordHash = await auth.hashPassword(newPassword);
 			await userFn.updateUserPassword(user.id, passwordHash);
 			logger.info('User password updated', { userId: user.id });
+			await logActivity(user.id, 'CHANGE_PASSWORD');
 		} catch (e) {
 			logger.error('Failed to update user password', e, { userId: user.id });
 			return fail(500, { message: 'An unknown error occurred' });
@@ -232,6 +241,7 @@ export const actions: Actions = {
 		try {
 			await auth.invalidateSession(sessionId);
 			logger.info('Session revoked', { userId: event.locals.user.id, sessionId });
+			await logActivity(event.locals.user.id, 'REVOKE_SESSION', { sessionId });
 		} catch (e) {
 			logger.error('Failed to revoke session', e, { userId: event.locals.user.id, sessionId });
 			return fail(500, { message: 'An unknown error occurred' });
@@ -253,6 +263,7 @@ export const actions: Actions = {
 		try {
 			await auth.invalidateOtherSessions(event.locals.user.id, event.locals.session.id);
 			logger.info('Other sessions revoked', { userId: event.locals.user.id });
+			await logActivity(event.locals.user.id, 'REVOKE_OTHER_SESSIONS');
 		} catch (e) {
 			logger.error('Failed to revoke other sessions', e, { userId: event.locals.user.id });
 			return fail(500, { message: 'An unknown error occurred' });
@@ -275,6 +286,7 @@ export const actions: Actions = {
 			await auth.invalidateAllUserSessions(event.locals.user.id);
 			auth.deleteSessionTokenCookie(event);
 			logger.info('All sessions revoked', { userId: event.locals.user.id });
+			await logActivity(event.locals.user.id, 'REVOKE_ALL_SESSIONS');
 		} catch (e) {
 			logger.error('Failed to revoke all sessions', e, { userId: event.locals.user.id });
 			return fail(500, { message: 'An unknown error occurred' });
@@ -305,6 +317,7 @@ export const actions: Actions = {
 		}
 
 		try {
+			await logActivity(event.locals.user.id, 'DELETE_ACCOUNT');
 			await userFn.deleteUser(event.locals.user.id);
 			auth.deleteSessionTokenCookie(event);
 			logger.info('User account deleted', { userId: event.locals.user.id });
@@ -314,5 +327,26 @@ export const actions: Actions = {
 		}
 
 		return redirect(302, '/demo/lucia/login');
+	},
+
+	/**
+	 * Clears the user's activity log.
+	 */
+	clearActivityLog: async (event) => {
+		if (!event.locals.session || !event.locals.user) {
+			return fail(401);
+		}
+
+		logger.info('Clear activity log action initiated', { userId: event.locals.user.id });
+
+		try {
+			await clearUserActivity(event.locals.user.id);
+			await logActivity(event.locals.user.id, 'ACTIVITY_LOG_CLEARED');
+		} catch (e) {
+			logger.error('Failed to clear activity log', e, { userId: event.locals.user.id });
+			return fail(500, { message: 'An unknown error occurred' });
+		}
+
+		return { message: 'Activity log cleared' };
 	}
 };

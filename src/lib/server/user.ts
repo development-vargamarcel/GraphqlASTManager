@@ -136,6 +136,7 @@ export async function updateUserPassword(userId: string, passwordHash: string): 
 export async function deleteUser(userId: string): Promise<void> {
 	try {
 		await db.delete(table.session).where(eq(table.session.userId, userId));
+		await db.delete(table.activityLog).where(eq(table.activityLog.userId, userId));
 		await db.delete(table.user).where(eq(table.user.id, userId));
 		logger.info('User deleted', { userId });
 	} catch (error) {
