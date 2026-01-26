@@ -55,6 +55,7 @@ The dashboard (`/demo/lucia`) allows authenticated users to manage their account
 2.  **Security**:
     - Change password. Requires current password verification.
     - New password must meet validation criteria.
+    - Revoke Sessions: Terminate individual sessions or sign out everywhere (revoke all sessions).
 
 3.  **Danger Zone**:
     - Delete account.

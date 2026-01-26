@@ -23,3 +23,19 @@ logger.info(`Database client initialized (${dev ? 'dev' : 'prod'} mode)`);
  * Initialized with the `better-sqlite3` driver and the schema definition.
  */
 export const db = drizzle(client, { schema });
+
+/**
+ * Checks the health of the database connection.
+ * Executes a simple query to verify connectivity.
+ *
+ * @returns True if the database is reachable, false otherwise.
+ */
+export async function healthCheck(): Promise<boolean> {
+	try {
+		await db.select().from(schema.user).limit(1);
+		return true;
+	} catch (error) {
+		logger.error('Database health check failed', error);
+		return false;
+	}
+}

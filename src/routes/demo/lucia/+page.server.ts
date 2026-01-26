@@ -247,6 +247,28 @@ export const actions: Actions = {
 	},
 
 	/**
+	 * Revokes all sessions for the user, effectively logging them out everywhere.
+	 */
+	revokeAllSessions: async (event) => {
+		if (!event.locals.session || !event.locals.user) {
+			return fail(401);
+		}
+
+		logger.info('Revoke all sessions action initiated', { userId: event.locals.user.id });
+
+		try {
+			await auth.invalidateAllUserSessions(event.locals.user.id);
+			auth.deleteSessionTokenCookie(event);
+			logger.info('All sessions revoked', { userId: event.locals.user.id });
+		} catch (e) {
+			logger.error('Failed to revoke all sessions', e, { userId: event.locals.user.id });
+			return fail(500, { message: 'An unknown error occurred' });
+		}
+
+		return redirect(302, '/demo/lucia/login');
+	},
+
+	/**
 	 * Deletes the user's account permanently.
 	 * Requires the user to type "DELETE" to confirm.
 	 */
