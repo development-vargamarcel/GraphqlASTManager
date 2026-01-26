@@ -37,7 +37,8 @@ export const load: PageServerLoad = async (event) => {
 		user: {
 			id: freshUser.id,
 			username: freshUser.username,
-			age: freshUser.age
+			age: freshUser.age,
+			bio: freshUser.bio
 		},
 		currentSessionId: event.locals.session?.id,
 		sessions: sessions.map((s) => ({
@@ -80,32 +81,46 @@ export const actions: Actions = {
 
 		const formData = await event.request.formData();
 		const ageStr = formData.get('age');
+		let age: number | null = null;
 
-		if (!ageStr || typeof ageStr !== 'string') {
-			logger.debug('Update profile failed: invalid age format', { userId: event.locals.user.id });
-			return fail(400, {
-				message: 'Invalid age provided',
-				errors: { age: 'Invalid age provided' }
-			});
+		if (ageStr && typeof ageStr === 'string') {
+			age = parseInt(ageStr, 10);
+			if (isNaN(age) || age < 0 || age > 150) {
+				logger.debug('Update profile failed: invalid age range', {
+					userId: event.locals.user.id,
+					age
+				});
+				return fail(400, {
+					message: 'Invalid age provided',
+					errors: { age: 'Invalid age provided' }
+				});
+			}
 		}
 
-		const age = parseInt(ageStr, 10);
-		if (isNaN(age) || age < 0 || age > 150) {
-			logger.debug('Update profile failed: invalid age range', {
-				userId: event.locals.user.id,
-				age
-			});
+		const bio = formData.get('bio');
+		if (bio !== null && typeof bio !== 'string') {
 			return fail(400, {
-				message: 'Invalid age provided',
-				errors: { age: 'Invalid age provided' }
+				message: 'Invalid bio format',
+				errors: { bio: 'Invalid bio format' }
+			});
+		}
+		if (typeof bio === 'string' && bio.length > 500) {
+			return fail(400, {
+				message: 'Bio too long',
+				errors: { bio: 'Bio must be less than 500 characters' }
 			});
 		}
 
 		try {
-			await userFn.updateUserAge(event.locals.user.id, age);
-			logger.info('User age updated', { userId: event.locals.user.id, age });
+			if (age !== null) {
+				await userFn.updateUserAge(event.locals.user.id, age);
+			}
+			if (typeof bio === 'string') {
+				await userFn.updateUserBio(event.locals.user.id, bio);
+			}
+			logger.info('User profile updated', { userId: event.locals.user.id, age });
 		} catch (e) {
-			logger.error('Failed to update user age', e, { userId: event.locals.user.id });
+			logger.error('Failed to update user profile', e, { userId: event.locals.user.id });
 			return fail(500, { message: 'An unknown error occurred' });
 		}
 

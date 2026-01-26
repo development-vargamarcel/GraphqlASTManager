@@ -55,6 +55,9 @@
 	let errors = $derived(
 		form && typeof form === 'object' && 'errors' in form ? (form as any).errors : {}
 	);
+	let message = $derived(
+		form && typeof form === 'object' && 'message' in form ? (form as any).message : null
+	);
 </script>
 
 <div class="flex min-h-[calc(100vh-12rem)] items-center justify-center py-12">
@@ -165,6 +168,30 @@
 							<p class="mt-1 text-sm text-red-600">{errors.age}</p>
 						{/if}
 					</div>
+
+					<div>
+						<label for="bio" class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+							>Bio</label
+						>
+						<textarea
+							name="bio"
+							id="bio"
+							rows="3"
+							maxlength="500"
+							aria-invalid={!!errors?.bio}
+							class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+							placeholder="Tell us about yourself...">{data.user.bio ?? ''}</textarea
+						>
+						<div class="mt-1 flex justify-between">
+							{#if errors?.bio}
+								<p class="text-sm text-red-600">{errors.bio}</p>
+							{:else}
+								<span></span>
+							{/if}
+							<p class="text-xs text-gray-500 dark:text-gray-400">Max 500 characters</p>
+						</div>
+					</div>
+
 					<button
 						type="submit"
 						disabled={loadingAction === 'updateProfile'}
