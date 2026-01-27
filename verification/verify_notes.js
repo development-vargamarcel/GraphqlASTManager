@@ -1,85 +1,66 @@
 import { chromium } from 'playwright';
-import fs from 'fs';
 
 (async () => {
   const browser = await chromium.launch();
   const page = await browser.newPage();
 
-  try {
-    console.log('Navigating to login...');
-    await page.goto('http://localhost:5173/demo/lucia/login');
+  page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+  page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
 
-    // Register
-    console.log('Switching to register tab...');
-    // Finding the tab button might depend on implementation. Looking at source, it's a button.
-    // Assuming "Register" text is visible.
-    // Wait for hydration/interactivity
-    await page.waitForLoadState('networkidle');
+  const username = 'user_' + Math.floor(Math.random() * 10000);
 
-    // Actually the login page has tabs.
-    // Let's check if we can register.
-    // Locate the tab button.
-    const registerTab = page.locator('button', { hasText: 'Register' });
-    if (await registerTab.isVisible()) {
-        await registerTab.click();
-    } else {
-        console.log('Register tab not found, maybe already on register or different layout?');
-    }
+  console.log('Registering user:', username);
 
-    console.log('Filling registration form...');
-    const username = 'testuser_' + Date.now();
-    // We need to be careful about which inputs we target if both forms are in DOM.
-    // Usually only one form is visible or they share inputs?
-    // In SvelteKit usually we swap forms or inputs.
-    // Let's assume standard inputs.
-    await page.fill('input[name="username"]', username);
-    await page.fill('input[name="password"]', 'password123');
+  // Register
+  await page.goto('http://localhost:5174/demo/lucia/login');
 
-    // Confirm password might only be visible in register mode.
-    const confirmInput = page.locator('input[name="confirmPassword"]');
-    if (await confirmInput.isVisible()) {
-        await confirmInput.fill('password123');
-    }
+  // Wait for network idle to ensure scripts loaded
+  await page.waitForLoadState('networkidle');
 
-    console.log('Submitting registration...');
-    // Click the submit button inside the form.
-    await page.click('button[type="submit"]');
+  await page.click('button[data-testid="register-tab"]');
 
-    // Wait for dashboard
-    await page.waitForURL('**/demo/lucia');
-    console.log('Logged in/Registered.');
+  // Wait for UI to update (Title changes)
+  await page.waitForSelector('h1:has-text("Create an Account")');
 
-    // Click Notes tab
-    console.log('Clicking Notes tab...');
-    await page.click('button:has-text("Notes")');
+  await page.fill('input[name="username"]', username);
+  await page.fill('input[name="password"]', 'password123');
+  await page.fill('input[name="confirmPassword"]', 'password123');
+  await page.click('button[type="submit"]');
 
-    // Verify Notes tab is active and form is visible
-    await page.waitForSelector('text=Personal Notes');
+  // Wait for navigation
+  await page.waitForURL('**/demo/lucia');
+  console.log('Logged in');
 
-    // Create Note
-    console.log('Creating note...');
-    await page.fill('input[name="title"]', 'My First Note');
-    await page.fill('textarea[name="content"]', 'This is the content of my first note.');
-    await page.click('button:has-text("Add Note")');
+  // Go to Notes tab
+  await page.click('button:has-text("Notes")');
 
-    // Verify note appears
-    console.log('Verifying note...');
-    await page.waitForSelector('h3:has-text("My First Note")');
-    await page.waitForSelector('p:has-text("This is the content of my first note.")');
+  // Create notes
+  await page.fill('input[name="title"]', 'Groceries');
+  await page.fill('textarea[name="content"]', 'Milk, Bread, Eggs');
+  await page.click('button:has-text("Add Note")');
+  await page.waitForSelector('h3:has-text("Groceries")');
 
-    // Screenshot
-    console.log('Taking screenshot...');
-    if (!fs.existsSync('verification')) fs.mkdirSync('verification');
-    await page.screenshot({ path: 'verification/notes_verification.png', fullPage: true });
+  await page.fill('input[name="title"]', 'Meeting');
+  await page.fill('textarea[name="content"]', 'Discuss Q3 goals');
+  await page.click('button:has-text("Add Note")');
+  await page.waitForSelector('h3:has-text("Meeting")');
 
-    console.log('Verification successful!');
-  } catch (e) {
-    console.error('Verification failed:', e);
-    // Take screenshot on failure
-    if (!fs.existsSync('verification')) fs.mkdirSync('verification');
-    await page.screenshot({ path: 'verification/failure.png' });
-    process.exit(1);
-  } finally {
-    await browser.close();
-  }
+  await page.fill('input[name="title"]', 'Ideas');
+  await page.fill('textarea[name="content"]', 'App idea: search feature');
+  await page.click('button:has-text("Add Note")');
+  await page.waitForSelector('h3:has-text("Ideas")');
+
+  console.log('Notes created');
+
+  // Search
+  await page.fill('input[placeholder="Search notes..."]', 'goals');
+
+  // Wait a bit for UI update
+  await page.waitForTimeout(500);
+
+  // Screenshot
+  await page.screenshot({ path: 'verification/search_notes.png', fullPage: true });
+  console.log('Screenshot taken');
+
+  await browser.close();
 })();

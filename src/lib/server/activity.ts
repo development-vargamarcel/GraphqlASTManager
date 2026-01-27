@@ -50,18 +50,26 @@ export async function logActivity(
  * Retrieves the activity log for a user.
  *
  * @param userId - The ID of the user.
- * @param limit - The maximum number of records to return (default: 50).
+ * @param limit - The maximum number of records to return (default: 50). Pass null for no limit.
  * @returns A list of activity log entries.
  */
-export async function getUserActivity(userId: string, limit = 50): Promise<ActivityLog[]> {
+export async function getUserActivity(
+	userId: string,
+	limit: number | null = 50
+): Promise<ActivityLog[]> {
 	try {
-		const results = await db
+		let query = db
 			.select()
 			.from(table.activityLog)
 			.where(eq(table.activityLog.userId, userId))
-			.orderBy(desc(table.activityLog.timestamp))
-			.limit(limit);
-		return results;
+			.orderBy(desc(table.activityLog.timestamp));
+
+		if (limit !== null) {
+			// @ts-ignore: Dynamic query construction
+			query = query.limit(limit);
+		}
+
+		return await query;
 	} catch (error) {
 		logger.error('Failed to get user activity', error, { userId });
 		return [];
