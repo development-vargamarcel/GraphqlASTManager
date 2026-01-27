@@ -29,3 +29,29 @@ export function validateUsername(username: unknown): username is string {
 export function validatePassword(password: unknown): password is string {
 	return typeof password === 'string' && password.length >= 6 && password.length <= 255;
 }
+
+/**
+ * Validates if the input is a valid note title.
+ * Criteria:
+ * - Must be a string
+ * - Length between 1 and 100 characters
+ *
+ * @param title - The input to validate
+ * @returns True if valid, false otherwise
+ */
+export function validateNoteTitle(title: unknown): title is string {
+	return typeof title === 'string' && title.length >= 1 && title.length <= 100;
+}
+
+/**
+ * Validates if the input is a valid note content.
+ * Criteria:
+ * - Must be a string
+ * - Length between 1 and 1000 characters
+ *
+ * @param content - The input to validate
+ * @returns True if valid, false otherwise
+ */
+export function validateNoteContent(content: unknown): content is string {
+	return typeof content === 'string' && content.length >= 1 && content.length <= 1000;
+}

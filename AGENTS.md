@@ -21,6 +21,7 @@ This project is a SvelteKit application using Drizzle ORM, custom authentication
 
 - **User**: `id` (text, PK), `username` (text, unique), `passwordHash` (text), `age` (int), `bio` (text).
 - **Session**: `id` (text, PK), `userId` (text, FK), `expiresAt` (int/timestamp).
+- **Note**: `id` (text, PK), `userId` (text, FK), `title` (text), `content` (text), `createdAt` (timestamp), `updatedAt` (timestamp).
 
 ## Key Flows
 
@@ -65,6 +66,11 @@ The dashboard (`/demo/lucia`) allows authenticated users to manage their account
 4.  **Data Export**:
     - "Download My Data" button in the Profile tab.
     - Exports user profile and session history as a JSON file.
+
+5.  **Personal Notes**:
+    - Manage personal notes.
+    - Create, Edit, and Delete notes.
+    - Notes are private to the user.
 
 ### Rate Limiting
 

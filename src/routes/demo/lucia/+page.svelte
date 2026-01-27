@@ -11,8 +11,9 @@
 
 	let { data, form }: { data: PageServerData; form: ActionData } = $props();
 
-	let activeTab = $state('profile'); // profile, security, danger
+	let activeTab = $state('profile'); // profile, security, activity, notes, danger
 	let loadingAction = $state<string | null>(null);
+	let editingNoteId = $state<string | null>(null);
 
 	// Password change state
 	let currentPassword = $state('');
@@ -122,6 +123,14 @@
 						: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'} border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap"
 				>
 					Activity
+				</button>
+				<button
+					onclick={() => (activeTab = 'notes')}
+					class="{activeTab === 'notes'
+						? 'border-blue-500 text-blue-600 dark:text-blue-400'
+						: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'} border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap"
+				>
+					Notes
 				</button>
 				<button
 					onclick={() => (activeTab = 'danger')}
@@ -679,6 +688,188 @@
 							</tbody>
 						</table>
 					</div>
+				</div>
+			{:else if activeTab === 'notes'}
+				<h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">Personal Notes</h2>
+
+				<!-- Create Note Form -->
+				<div class="mb-6 rounded-md bg-gray-50 p-4 dark:bg-gray-700/50">
+					<h3 class="mb-2 text-sm font-medium text-gray-900 dark:text-white">New Note</h3>
+					<form
+						method="post"
+						action="?/createNote"
+						use:enhance={() => {
+							loadingAction = 'createNote';
+							return async ({ update, result, formElement }) => {
+								loadingAction = null;
+								if (result.type === 'success') {
+									toastState.add('Note created', 'success');
+									formElement.reset();
+								} else if (result.type === 'failure') {
+									toastState.add(result.data?.message?.toString() || 'Failed to create note', 'error');
+								}
+								await update();
+							};
+						}}
+						class="space-y-4"
+					>
+						<div>
+							<label for="note-title" class="sr-only">Title</label>
+							<input
+								type="text"
+								name="title"
+								id="note-title"
+								placeholder="Note Title"
+								required
+								maxlength="100"
+								class="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+							/>
+							{#if errors?.title}
+								<p class="mt-1 text-sm text-red-600">{errors.title}</p>
+							{/if}
+						</div>
+						<div>
+							<label for="note-content" class="sr-only">Content</label>
+							<textarea
+								name="content"
+								id="note-content"
+								rows="3"
+								placeholder="Write your note here..."
+								required
+								maxlength="1000"
+								class="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+							></textarea>
+							{#if errors?.content}
+								<p class="mt-1 text-sm text-red-600">{errors.content}</p>
+							{/if}
+						</div>
+						<div class="flex justify-end">
+							<button
+								type="submit"
+								disabled={loadingAction === 'createNote'}
+								class="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
+							>
+								{#if loadingAction === 'createNote'}
+									Creating...
+								{:else}
+									Add Note
+								{/if}
+							</button>
+						</div>
+					</form>
+				</div>
+
+				<!-- Notes List -->
+				<div class="space-y-4">
+					{#each data.notes as note (note.id)}
+						<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+							{#if editingNoteId === note.id}
+								<form
+									method="post"
+									action="?/updateNote"
+									use:enhance={() => {
+										loadingAction = `updateNote-${note.id}`;
+										return async ({ update, result }) => {
+											loadingAction = null;
+											if (result.type === 'success') {
+												toastState.add('Note updated', 'success');
+												editingNoteId = null;
+											} else if (result.type === 'failure') {
+												toastState.add(result.data?.message?.toString() || 'Failed to update note', 'error');
+											}
+											await update();
+										};
+									}}
+									class="space-y-3"
+								>
+									<input type="hidden" name="noteId" value={note.id} />
+									<input
+										type="text"
+										name="title"
+										value={note.title}
+										required
+										maxlength="100"
+										class="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+									/>
+									<textarea
+										name="content"
+										rows="3"
+										required
+										maxlength="1000"
+										class="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+									>{note.content}</textarea>
+									<div class="flex justify-end gap-2">
+										<button
+											type="button"
+											onclick={() => (editingNoteId = null)}
+											class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+										>
+											Cancel
+										</button>
+										<button
+											type="submit"
+											disabled={loadingAction === `updateNote-${note.id}`}
+											class="rounded-md border border-transparent bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+										>
+											Save
+										</button>
+									</div>
+								</form>
+							{:else}
+								<div class="flex items-start justify-between">
+									<div class="flex-1">
+										<h3 class="text-lg font-medium text-gray-900 dark:text-white">{note.title}</h3>
+										<p class="mt-1 text-sm text-gray-500 dark:text-gray-400 whitespace-pre-wrap">{note.content}</p>
+										<p class="mt-2 text-xs text-gray-400 dark:text-gray-500">
+											{new Date(note.updatedAt).toLocaleDateString()}
+										</p>
+									</div>
+									<div class="ml-4 flex gap-2">
+										<button
+											type="button"
+											onclick={() => (editingNoteId = note.id)}
+											class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+											aria-label="Edit note"
+										>
+											<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+												<path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+											</svg>
+										</button>
+										<form
+											method="post"
+											action="?/deleteNote"
+											use:enhance={() => {
+												loadingAction = `deleteNote-${note.id}`;
+												return async ({ update, result }) => {
+													loadingAction = null;
+													if (result.type === 'success') {
+														toastState.add('Note deleted', 'success');
+													}
+													await update();
+												};
+											}}
+										>
+											<input type="hidden" name="noteId" value={note.id} />
+											<button
+												type="submit"
+												disabled={loadingAction === `deleteNote-${note.id}`}
+												class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+												aria-label="Delete note"
+											>
+												<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+													<path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+												</svg>
+											</button>
+										</form>
+									</div>
+								</div>
+							{/if}
+						</div>
+					{:else}
+						<div class="text-center text-gray-500 dark:text-gray-400">
+							<p>No notes yet.</p>
+						</div>
+					{/each}
 				</div>
 			{:else if activeTab === 'danger'}
 				<h2 class="mb-4 text-xl font-semibold text-red-600 dark:text-red-400">Danger Zone</h2>

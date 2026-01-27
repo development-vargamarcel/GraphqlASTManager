@@ -1,5 +1,6 @@
 import * as auth from '$lib/server/auth.js';
 import * as userFn from '$lib/server/user.js';
+import * as noteFn from '$lib/server/note.js';
 import * as validation from '$lib/server/validation.js';
 import { logActivity, getUserActivity, clearUserActivity } from '$lib/server/activity.js';
 import { Logger } from '$lib/server/logger.js';
@@ -34,6 +35,7 @@ export const load: PageServerLoad = async (event) => {
 	// However, locals.user only has id and username.
 	const sessions = await auth.getUserSessions(user.id);
 	const activityLogs = await getUserActivity(user.id);
+	const notes = await noteFn.getUserNotes(user.id);
 
 	return {
 		user: {
@@ -49,7 +51,8 @@ export const load: PageServerLoad = async (event) => {
 			ipAddress: s.ipAddress,
 			userAgent: parseUserAgent(s.userAgent)
 		})),
-		activityLogs
+		activityLogs,
+		notes
 	};
 };
 
@@ -348,5 +351,119 @@ export const actions: Actions = {
 		}
 
 		return { message: 'Activity log cleared' };
+	},
+
+	/**
+	 * Creates a new note for the user.
+	 */
+	createNote: async (event) => {
+		if (!event.locals.session || !event.locals.user) {
+			return fail(401);
+		}
+
+		const formData = await event.request.formData();
+		const title = formData.get('title');
+		const content = formData.get('content');
+
+		if (!validation.validateNoteTitle(title)) {
+			return fail(400, {
+				message: 'Invalid title',
+				errors: { title: 'Title must be 1-100 characters' }
+			});
+		}
+		if (!validation.validateNoteContent(content)) {
+			return fail(400, {
+				message: 'Invalid content',
+				errors: { content: 'Content must be 1-1000 characters' }
+			});
+		}
+
+		try {
+			await noteFn.createNote(event.locals.user.id, title, content);
+			logger.info('Note created', { userId: event.locals.user.id });
+		} catch (e) {
+			logger.error('Failed to create note', e, { userId: event.locals.user.id });
+			return fail(500, { message: 'An unknown error occurred' });
+		}
+
+		return { message: 'Note created successfully' };
+	},
+
+	/**
+	 * Updates an existing note.
+	 */
+	updateNote: async (event) => {
+		if (!event.locals.session || !event.locals.user) {
+			return fail(401);
+		}
+
+		const formData = await event.request.formData();
+		const noteId = formData.get('noteId');
+		const title = formData.get('title');
+		const content = formData.get('content');
+
+		if (typeof noteId !== 'string') {
+			return fail(400, { message: 'Invalid note ID' });
+		}
+		if (!validation.validateNoteTitle(title)) {
+			return fail(400, {
+				message: 'Invalid title',
+				errors: { title: 'Title must be 1-100 characters' }
+			});
+		}
+		if (!validation.validateNoteContent(content)) {
+			return fail(400, {
+				message: 'Invalid content',
+				errors: { content: 'Content must be 1-1000 characters' }
+			});
+		}
+
+		// Verify ownership
+		const note = await noteFn.getNoteById(noteId);
+		if (!note || note.userId !== event.locals.user.id) {
+			return fail(403, { message: 'Unauthorized' });
+		}
+
+		try {
+			await noteFn.updateNote(noteId, title, content);
+			logger.info('Note updated', { userId: event.locals.user.id, noteId });
+		} catch (e) {
+			logger.error('Failed to update note', e, { userId: event.locals.user.id, noteId });
+			return fail(500, { message: 'An unknown error occurred' });
+		}
+
+		return { message: 'Note updated successfully' };
+	},
+
+	/**
+	 * Deletes a note.
+	 */
+	deleteNote: async (event) => {
+		if (!event.locals.session || !event.locals.user) {
+			return fail(401);
+		}
+
+		const formData = await event.request.formData();
+		const noteId = formData.get('noteId');
+
+		if (typeof noteId !== 'string') {
+			return fail(400, { message: 'Invalid note ID' });
+		}
+
+		// Verify ownership
+		const note = await noteFn.getNoteById(noteId);
+		if (!note || note.userId !== event.locals.user.id) {
+			return fail(403, { message: 'Unauthorized' });
+		}
+
+		try {
+			await noteFn.deleteNote(noteId);
+			logger.info('Note deleted', { userId: event.locals.user.id, noteId });
+		} catch (e) {
+			logger.error('Failed to delete note', e, { userId: event.locals.user.id, noteId });
+			return fail(500, { message: 'An unknown error occurred' });
+		}
+
+		return { message: 'Note deleted successfully' };
 	}
 };
