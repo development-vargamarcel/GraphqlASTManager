@@ -364,6 +364,15 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 		const title = formData.get('title');
 		const content = formData.get('content');
+		const tagsStr = formData.get('tags');
+
+		let tags: string[] = [];
+		if (typeof tagsStr === 'string' && tagsStr.trim().length > 0) {
+			tags = tagsStr
+				.split(',')
+				.map((t) => t.trim())
+				.filter((t) => t.length > 0);
+		}
 
 		if (!validation.validateNoteTitle(title)) {
 			return fail(400, {
@@ -377,9 +386,15 @@ export const actions: Actions = {
 				errors: { content: 'Content must be 1-1000 characters' }
 			});
 		}
+		if (!validation.validateNoteTags(tags)) {
+			return fail(400, {
+				message: 'Invalid tags',
+				errors: { tags: 'Max 5 tags, each 1-20 characters' }
+			});
+		}
 
 		try {
-			await noteFn.createNote(event.locals.user.id, title, content);
+			await noteFn.createNote(event.locals.user.id, title, content, tags);
 			logger.info('Note created', { userId: event.locals.user.id });
 		} catch (e) {
 			logger.error('Failed to create note', e, { userId: event.locals.user.id });
@@ -401,6 +416,15 @@ export const actions: Actions = {
 		const noteId = formData.get('noteId');
 		const title = formData.get('title');
 		const content = formData.get('content');
+		const tagsStr = formData.get('tags');
+
+		let tags: string[] = [];
+		if (typeof tagsStr === 'string' && tagsStr.trim().length > 0) {
+			tags = tagsStr
+				.split(',')
+				.map((t) => t.trim())
+				.filter((t) => t.length > 0);
+		}
 
 		if (typeof noteId !== 'string') {
 			return fail(400, { message: 'Invalid note ID' });
@@ -417,6 +441,12 @@ export const actions: Actions = {
 				errors: { content: 'Content must be 1-1000 characters' }
 			});
 		}
+		if (!validation.validateNoteTags(tags)) {
+			return fail(400, {
+				message: 'Invalid tags',
+				errors: { tags: 'Max 5 tags, each 1-20 characters' }
+			});
+		}
 
 		// Verify ownership
 		const note = await noteFn.getNoteById(noteId);
@@ -425,7 +455,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			await noteFn.updateNote(noteId, title, content);
+			await noteFn.updateNote(noteId, title, content, tags);
 			logger.info('Note updated', { userId: event.locals.user.id, noteId });
 		} catch (e) {
 			logger.error('Failed to update note', e, { userId: event.locals.user.id, noteId });

@@ -55,3 +55,24 @@ export function validateNoteTitle(title: unknown): title is string {
 export function validateNoteContent(content: unknown): content is string {
 	return typeof content === 'string' && content.length >= 1 && content.length <= 1000;
 }
+
+/**
+ * Validates if the input is a valid list of note tags.
+ * Criteria:
+ * - Must be an array of strings
+ * - Max 5 tags
+ * - Each tag length between 1 and 20 characters
+ *
+ * @param tags - The input to validate
+ * @returns True if valid, false otherwise
+ */
+export function validateNoteTags(tags: unknown): tags is string[] {
+	if (!Array.isArray(tags)) return false;
+	if (tags.length > 5) return false;
+	for (const tag of tags) {
+		if (typeof tag !== 'string' || tag.length < 1 || tag.length > 20) {
+			return false;
+		}
+	}
+	return true;
+}

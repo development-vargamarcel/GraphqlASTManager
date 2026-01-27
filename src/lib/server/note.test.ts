@@ -115,12 +115,13 @@ describe('note', () => {
 			const mockSet = vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) });
 			vi.mocked(db.update).mockReturnValue({ set: mockSet } as any);
 
-			await note.updateNote('1', 'New Title', 'New Content');
+			await note.updateNote('1', 'New Title', 'New Content', ['tag1']);
 			expect(db.update).toHaveBeenCalledWith(table.note);
 			// Check arguments passed to set, avoiding strict equality check on Date
 			const setCallArgs = mockSet.mock.calls[0][0];
 			expect(setCallArgs.title).toBe('New Title');
 			expect(setCallArgs.content).toBe('New Content');
+			expect(setCallArgs.tags).toEqual(['tag1']);
 			expect(setCallArgs.updatedAt).toBeInstanceOf(Date);
 		});
 	});

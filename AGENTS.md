@@ -65,12 +65,12 @@ The dashboard (`/demo/lucia`) allows authenticated users to manage their account
 
 4.  **Data Export**:
     - "Download My Data" button in the Profile tab.
-    -   Exports user profile, session history, notes, and activity logs as a JSON file.
+    - Exports user profile, session history, notes, and activity logs as a JSON file.
 
 5.  **Personal Notes**:
     - Manage personal notes.
     - Create, Edit, and Delete notes.
-    -   Search and filter notes by title or content.
+    - Search and filter notes by title or content.
     - Notes are private to the user.
 
 ### Rate Limiting

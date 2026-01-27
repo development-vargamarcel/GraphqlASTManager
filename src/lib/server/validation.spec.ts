@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateUsername, validatePassword } from './validation.js';
+import { validateUsername, validatePassword, validateNoteTags } from './validation.js';
 
 describe('validation', () => {
 	describe('validateUsername', () => {
@@ -28,6 +28,22 @@ describe('validation', () => {
 			expect(validatePassword('pass')).toBe(false); // too short
 			expect(validatePassword('a'.repeat(256))).toBe(false); // too long
 			expect(validatePassword(123)).toBe(false); // not a string
+		});
+	});
+
+	describe('validateNoteTags', () => {
+		it('should return true for valid tags', () => {
+			expect(validateNoteTags([])).toBe(true);
+			expect(validateNoteTags(['tag1'])).toBe(true);
+			expect(validateNoteTags(['tag1', 'tag2', 'tag3', 'tag4', 'tag5'])).toBe(true);
+		});
+
+		it('should return false for invalid tags', () => {
+			expect(validateNoteTags('tag')).toBe(false); // not array
+			expect(validateNoteTags(['tag1', 'tag2', 'tag3', 'tag4', 'tag5', 'tag6'])).toBe(false); // too many
+			expect(validateNoteTags([''])).toBe(false); // empty tag
+			expect(validateNoteTags(['a'.repeat(21)])).toBe(false); // tag too long
+			expect(validateNoteTags([123])).toBe(false); // not string
 		});
 	});
 });

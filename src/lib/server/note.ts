@@ -22,15 +22,22 @@ function generateNoteId() {
  * @param userId - The ID of the user creating the note.
  * @param title - The title of the note.
  * @param content - The content of the note.
+ * @param tags - The tags associated with the note.
  * @returns The created note.
  */
-export async function createNote(userId: string, title: string, content: string): Promise<Note> {
+export async function createNote(
+	userId: string,
+	title: string,
+	content: string,
+	tags: string[] = []
+): Promise<Note> {
 	const id = generateNoteId();
 	const note: Note = {
 		id,
 		userId,
 		title,
 		content,
+		tags,
 		createdAt: new Date(),
 		updatedAt: new Date()
 	};
@@ -81,18 +88,24 @@ export async function getNoteById(noteId: string): Promise<Note | undefined> {
 }
 
 /**
- * Updates a note's title and content.
+ * Updates a note's title, content, and tags.
  * Updates the updatedAt timestamp.
  *
  * @param noteId - The ID of the note to update.
  * @param title - The new title.
  * @param content - The new content.
+ * @param tags - The new tags.
  */
-export async function updateNote(noteId: string, title: string, content: string): Promise<void> {
+export async function updateNote(
+	noteId: string,
+	title: string,
+	content: string,
+	tags: string[]
+): Promise<void> {
 	try {
 		await db
 			.update(table.note)
-			.set({ title, content, updatedAt: new Date() })
+			.set({ title, content, tags, updatedAt: new Date() })
 			.where(eq(table.note.id, noteId));
 		logger.info('Note updated', { noteId });
 	} catch (error) {
