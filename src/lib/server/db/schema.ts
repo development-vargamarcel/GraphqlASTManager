@@ -57,6 +57,29 @@ export const activityLog = sqliteTable(
 );
 
 /**
+ * Note table definition.
+ * Stores user personal notes.
+ */
+export const note = sqliteTable(
+	'note',
+	{
+		id: text('id').primaryKey(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => user.id),
+		title: text('title').notNull(),
+		content: text('content').notNull(),
+		createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+		updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
+	},
+	(table) => {
+		return {
+			noteUserIdIdx: index('note_user_id_idx').on(table.userId)
+		};
+	}
+);
+
+/**
  * Type definition for a Session object inferred from the schema.
  */
 export type Session = typeof session.$inferSelect;
@@ -70,3 +93,8 @@ export type User = typeof user.$inferSelect;
  * Type definition for an Activity Log object inferred from the schema.
  */
 export type ActivityLog = typeof activityLog.$inferSelect;
+
+/**
+ * Type definition for a Note object inferred from the schema.
+ */
+export type Note = typeof note.$inferSelect;
