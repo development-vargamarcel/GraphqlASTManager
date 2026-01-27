@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from './+server.js';
 import * as userFn from '$lib/server/user.js';
 import * as auth from '$lib/server/auth.js';
+import * as noteFn from '$lib/server/note.js';
+import * as activityFn from '$lib/server/activity.js';
 
 vi.mock('$lib/server/user.js', () => ({
 	getUserById: vi.fn()
@@ -9,6 +11,14 @@ vi.mock('$lib/server/user.js', () => ({
 
 vi.mock('$lib/server/auth.js', () => ({
 	getUserSessions: vi.fn()
+}));
+
+vi.mock('$lib/server/note.js', () => ({
+	getUserNotes: vi.fn()
+}));
+
+vi.mock('$lib/server/activity.js', () => ({
+	getUserActivity: vi.fn()
 }));
 
 // Mock `json` and `redirect` from SvelteKit
@@ -44,6 +54,7 @@ describe('GET /demo/lucia/export', () => {
 			id: 'user-123',
 			username: 'testuser',
 			age: 25,
+			bio: 'test bio',
 			passwordHash: 'hash'
 		};
 		const mockSessions = [
@@ -54,9 +65,27 @@ describe('GET /demo/lucia/export', () => {
 				userAgent: 'TestAgent'
 			}
 		];
+		const mockNotes = [
+			{
+				id: 'note-1',
+				title: 'Test Note',
+				content: 'Content',
+				createdAt: new Date(),
+				updatedAt: new Date()
+			}
+		];
+		const mockActivity = [
+			{
+				action: 'LOGIN',
+				details: null,
+				timestamp: new Date()
+			}
+		];
 
 		(userFn.getUserById as any).mockResolvedValue(mockUser);
 		(auth.getUserSessions as any).mockResolvedValue(mockSessions);
+		(noteFn.getUserNotes as any).mockResolvedValue(mockNotes);
+		(activityFn.getUserActivity as any).mockResolvedValue(mockActivity);
 
 		const event = {
 			locals: { user: { id: 'user-123' } }
@@ -69,10 +98,15 @@ describe('GET /demo/lucia/export', () => {
 		expect(data.user).toEqual({
 			id: 'user-123',
 			username: 'testuser',
-			age: 25
+			age: 25,
+			bio: 'test bio'
 		});
 		expect(data.sessions).toHaveLength(1);
 		expect(data.sessions[0].id).toBe('session-1');
+		expect(data.notes).toHaveLength(1);
+		expect(data.notes[0].title).toBe('Test Note');
+		expect(data.activityLogs).toHaveLength(1);
+		expect(data.activityLogs[0].action).toBe('LOGIN');
 
 		// Check headers
 		const disposition = response.headers.get('Content-Disposition');
