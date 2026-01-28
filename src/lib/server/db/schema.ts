@@ -69,6 +69,7 @@ export const note = sqliteTable(
 			.references(() => user.id),
 		title: text('title').notNull(),
 		content: text('content').notNull(),
+		tags: text('tags', { mode: 'json' }).$type<string[]>().default([]),
 		createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
 		updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 	},

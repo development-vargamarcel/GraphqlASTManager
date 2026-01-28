@@ -1,0 +1,1 @@
+ALTER TABLE `note` ADD `tags` text DEFAULT '[]';

@@ -29,6 +29,15 @@ The schema is defined in `src/lib/server/db/schema.ts`.
     - `details`: Text (JSON string).
     - `timestamp`: Timestamp.
 
+4.  **Note (`note`)**
+    - `id`: Text, Primary Key (Random base32 ID).
+    - `userId`: Text, Foreign Key to `user.id`.
+    - `title`: Text.
+    - `content`: Text.
+    - `tags`: Text (JSON array of strings).
+    - `createdAt`: Timestamp.
+    - `updatedAt`: Timestamp.
+
 ## Migrations
 
 We use **Drizzle Kit** to manage schema changes.

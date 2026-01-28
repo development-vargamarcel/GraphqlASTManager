@@ -65,7 +65,9 @@
 		data.notes.filter(
 			(note) =>
 				note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				note.content.toLowerCase().includes(searchQuery.toLowerCase())
+				note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				(note.tags &&
+					note.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())))
 		)
 	);
 </script>
@@ -755,6 +757,19 @@
 								<p class="mt-1 text-sm text-red-600">{errors.content}</p>
 							{/if}
 						</div>
+						<div>
+							<label for="note-tags" class="sr-only">Tags</label>
+							<input
+								type="text"
+								name="tags"
+								id="note-tags"
+								placeholder="Tags (comma separated, max 5)"
+								class="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+							/>
+							{#if errors?.tags}
+								<p class="mt-1 text-sm text-red-600">{errors.tags}</p>
+							{/if}
+						</div>
 						<div class="flex justify-end">
 							<button
 								type="submit"
@@ -846,6 +861,13 @@
 										class="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
 										>{note.content}</textarea
 									>
+									<input
+										type="text"
+										name="tags"
+										value={note.tags ? note.tags.join(', ') : ''}
+										placeholder="Tags (comma separated)"
+										class="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+									/>
 									<div class="flex justify-end gap-2">
 										<button
 											type="button"
@@ -870,6 +892,17 @@
 										<p class="mt-1 text-sm whitespace-pre-wrap text-gray-500 dark:text-gray-400">
 											{note.content}
 										</p>
+										{#if note.tags && note.tags.length > 0}
+											<div class="mt-2 flex flex-wrap gap-2">
+												{#each note.tags as tag}
+													<span
+														class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+													>
+														{tag}
+													</span>
+												{/each}
+											</div>
+										{/if}
 										<p class="mt-2 text-xs text-gray-400 dark:text-gray-500">
 											{new Date(note.updatedAt).toLocaleDateString()}
 										</p>
