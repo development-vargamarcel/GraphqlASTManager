@@ -11,7 +11,6 @@
 
 	let passwordsMatch = $derived(newPassword === confirmPassword);
 	let message = $derived(form?.message);
-	let error = $derived(form?.error); // Generic error if any
 
 	function toggleShowPassword() {
 		showPassword = !showPassword;
@@ -126,7 +125,8 @@
 				<div>
 					<label
 						for="confirmPassword"
-						class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm Password</label
+						class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+						>Confirm Password</label
 					>
 					<div class="mt-1">
 						<input

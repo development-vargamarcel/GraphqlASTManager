@@ -94,7 +94,8 @@ export const apiToken = sqliteTable(
 		tokenHash: text('token_hash').notNull(),
 		name: text('name').notNull(),
 		createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
-		expiresAt: integer('expires_at', { mode: 'timestamp' })
+		expiresAt: integer('expires_at', { mode: 'timestamp' }),
+		lastUsedAt: integer('last_used_at', { mode: 'timestamp' })
 	},
 	(table) => {
 		return {

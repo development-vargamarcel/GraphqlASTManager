@@ -45,7 +45,10 @@ export async function validatePasswordResetToken(token: string): Promise<string 
 	const tokenHash = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
 
 	const result = await db
-		.select({ userId: schema.passwordResetToken.userId, expiresAt: schema.passwordResetToken.expiresAt })
+		.select({
+			userId: schema.passwordResetToken.userId,
+			expiresAt: schema.passwordResetToken.expiresAt
+		})
 		.from(schema.passwordResetToken)
 		.where(eq(schema.passwordResetToken.tokenHash, tokenHash))
 		.limit(1);
@@ -57,7 +60,9 @@ export async function validatePasswordResetToken(token: string): Promise<string 
 	const { userId, expiresAt } = result[0];
 
 	if (Date.now() >= expiresAt.getTime()) {
-		await db.delete(schema.passwordResetToken).where(eq(schema.passwordResetToken.tokenHash, tokenHash));
+		await db
+			.delete(schema.passwordResetToken)
+			.where(eq(schema.passwordResetToken.tokenHash, tokenHash));
 		return null;
 	}
 
@@ -72,5 +77,7 @@ export async function validatePasswordResetToken(token: string): Promise<string 
  */
 export async function consumePasswordResetToken(token: string): Promise<void> {
 	const tokenHash = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-	await db.delete(schema.passwordResetToken).where(eq(schema.passwordResetToken.tokenHash, tokenHash));
+	await db
+		.delete(schema.passwordResetToken)
+		.where(eq(schema.passwordResetToken.tokenHash, tokenHash));
 }

@@ -41,7 +41,9 @@ test.describe('Password Reset', () => {
 
 		try {
 			// 1. Get User ID
-			const userRecord = db.prepare('SELECT id FROM user WHERE username = ?').get(username) as { id: string };
+			const userRecord = db.prepare('SELECT id FROM user WHERE username = ?').get(username) as {
+				id: string;
+			};
 			if (!userRecord) throw new Error('User not found');
 
 			// 2. Insert Token
@@ -49,11 +51,9 @@ test.describe('Password Reset', () => {
 			// Drizzle stores timestamps as ms (integer) when mode: 'timestamp'
 			const expiresAtMs = Date.now() + 1000 * 60 * 15;
 
-			db.prepare('INSERT INTO password_reset_token (token_hash, user_id, expires_at) VALUES (?, ?, ?)').run(
-				tokenHash,
-				userRecord.id,
-				expiresAtMs
-			);
+			db.prepare(
+				'INSERT INTO password_reset_token (token_hash, user_id, expires_at) VALUES (?, ?, ?)'
+			).run(tokenHash, userRecord.id, expiresAtMs);
 		} finally {
 			db.close();
 		}

@@ -1,0 +1,1 @@
+ALTER TABLE `api_token` ADD `last_used_at` integer;
