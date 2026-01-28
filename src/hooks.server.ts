@@ -1,5 +1,6 @@
 import { sequence } from '@sveltejs/kit/hooks';
 import * as auth from '$lib/server/auth.js';
+import * as api from '$lib/server/api.js';
 import type { Handle, HandleServerError } from '@sveltejs/kit';
 import { paraglideMiddleware } from '$lib/paraglide/server.js';
 import { RateLimiter } from '$lib/server/rate-limiter.js';
@@ -142,6 +143,47 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 };
 
 /**
+ * Handle hook for API authentication.
+ * Validates Bearer tokens for requests starting with /api/.
+ * Runs after handleAuth to allow overriding or supplementing cookie auth.
+ */
+const handleApiAuth: Handle = async ({ event, resolve }) => {
+	if (event.url.pathname.startsWith('/api/')) {
+		const authHeader = event.request.headers.get('Authorization');
+
+		if (authHeader && authHeader.startsWith('Bearer ')) {
+			const token = authHeader.split(' ')[1];
+			const { user } = await api.validateApiToken(token);
+
+			if (user) {
+				event.locals.user = user;
+				// API access doesn't have a session object in the traditional sense
+				event.locals.session = null;
+				logger.info('API request authenticated via Token', {
+					userId: user.id,
+					path: event.url.pathname
+				});
+			} else {
+				logger.warn('Invalid API token provided', { path: event.url.pathname });
+				return new Response(JSON.stringify({ message: 'Invalid API token' }), {
+					status: 401,
+					headers: { 'Content-Type': 'application/json' }
+				});
+			}
+		}
+
+		// If no user is authenticated (via Cookie or Token), return 401 for API routes
+		if (!event.locals.user) {
+			return new Response(JSON.stringify({ message: 'Unauthorized' }), {
+				status: 401,
+				headers: { 'Content-Type': 'application/json' }
+			});
+		}
+	}
+	return resolve(event);
+};
+
+/**
  * Global server hook.
  * Chains multiple middleware functions to handle logging, security headers,
  * rate limiting, localization, and authentication for every request.
@@ -151,7 +193,8 @@ export const handle: Handle = sequence(
 	handleSecurityHeaders,
 	handleRateLimit,
 	handleParaglide,
-	handleAuth
+	handleAuth,
+	handleApiAuth
 );
 
 /**

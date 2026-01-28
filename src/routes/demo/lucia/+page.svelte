@@ -11,10 +11,11 @@
 
 	let { data, form }: { data: PageServerData; form: ActionData } = $props();
 
-	let activeTab = $state('profile'); // profile, security, activity, notes, danger
+	let activeTab = $state('profile'); // profile, security, activity, notes, api, danger
 	let loadingAction = $state<string | null>(null);
 	let editingNoteId = $state<string | null>(null);
 	let searchQuery = $state('');
+	let displayToken = $state<string | null>(null);
 
 	// Password change state
 	let currentPassword = $state('');
@@ -142,6 +143,14 @@
 						: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'} border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap"
 				>
 					Notes
+				</button>
+				<button
+					onclick={() => (activeTab = 'api')}
+					class="{activeTab === 'api'
+						? 'border-blue-500 text-blue-600 dark:text-blue-400'
+						: 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'} border-b-2 px-1 py-4 text-sm font-medium whitespace-nowrap"
+				>
+					API Access
 				</button>
 				<button
 					onclick={() => (activeTab = 'danger')}
@@ -979,6 +988,212 @@
 							{/if}
 						</div>
 					{/each}
+				</div>
+			{:else if activeTab === 'api'}
+				<h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">API Access</h2>
+				<p class="mb-6 text-sm text-gray-500 dark:text-gray-400">
+					Create personal access tokens to access your data programmatically. Treat these tokens like
+					passwords.
+				</p>
+
+				{#if displayToken}
+					<div
+						class="mb-6 rounded-md border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-900/30"
+					>
+						<div class="flex">
+							<div class="shrink-0">
+								<svg
+									class="h-5 w-5 text-green-400"
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+									aria-hidden="true"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+										clip-rule="evenodd"
+									/>
+								</svg>
+							</div>
+							<div class="ml-3 w-full">
+								<h3 class="text-sm font-medium text-green-800 dark:text-green-200">
+									Token Created Successfully
+								</h3>
+								<div class="mt-2 text-sm text-green-700 dark:text-green-300">
+									<p>Copy this token now. You won't be able to see it again!</p>
+									<div class="mt-2 flex items-center gap-2">
+										<code
+											class="block w-full break-all rounded bg-white p-2 font-mono text-gray-800 shadow-sm dark:bg-gray-800 dark:text-gray-200"
+										>
+											{displayToken}
+										</code>
+										<button
+											onclick={() => {
+												navigator.clipboard.writeText(displayToken!);
+												toastState.add('Token copied!', 'success');
+											}}
+											class="shrink-0 rounded-md bg-green-100 p-2 text-green-800 hover:bg-green-200 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none dark:bg-green-800 dark:text-green-100 dark:hover:bg-green-700"
+											aria-label="Copy token"
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke-width="1.5"
+												stroke="currentColor"
+												class="size-5"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5"
+												/>
+											</svg>
+										</button>
+									</div>
+								</div>
+								<div class="mt-4">
+									<button
+										onclick={() => (displayToken = null)}
+										type="button"
+										class="rounded-md bg-green-100 px-2 py-1.5 text-sm font-medium text-green-800 hover:bg-green-200 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none dark:bg-green-800 dark:text-green-100 dark:hover:bg-green-700"
+									>
+										Dismiss
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				{/if}
+
+				<!-- Create Token Form -->
+				<div class="mb-8 rounded-md bg-gray-50 p-4 dark:bg-gray-700/50">
+					<h3 class="mb-4 text-sm font-medium text-gray-900 dark:text-white">Generate New Token</h3>
+					<form
+						method="post"
+						action="?/createApiToken"
+						use:enhance={() => {
+							loadingAction = 'createApiToken';
+							return async ({ update, result, formElement }) => {
+								loadingAction = null;
+								if (result.type === 'success') {
+									if (result.data && 'token' in result.data) {
+										displayToken = result.data.token as string;
+									}
+									toastState.add('Token created successfully', 'success');
+									formElement.reset();
+								} else if (result.type === 'failure') {
+									toastState.add(
+										result.data?.message?.toString() || 'Failed to create token',
+										'error'
+									);
+								}
+								await update();
+							};
+						}}
+						class="flex items-end gap-4"
+					>
+						<div class="flex-1">
+							<label for="token-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+								>Token Name</label
+							>
+							<input
+								type="text"
+								name="name"
+								id="token-name"
+								required
+								maxlength="50"
+								placeholder="e.g. My Laptop"
+								class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+							/>
+						</div>
+						<button
+							type="submit"
+							disabled={loadingAction === 'createApiToken'}
+							class="rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
+						>
+							{#if loadingAction === 'createApiToken'}
+								Generating...
+							{:else}
+								Generate
+							{/if}
+						</button>
+					</form>
+				</div>
+
+				<!-- Tokens List -->
+				<div class="overflow-hidden rounded-md border border-gray-200 shadow-sm dark:border-gray-700">
+					<table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+						<thead class="bg-gray-50 dark:bg-gray-700">
+							<tr>
+								<th
+									scope="col"
+									class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
+									>Name</th
+								>
+								<th
+									scope="col"
+									class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
+									>Created</th
+								>
+								<th
+									scope="col"
+									class="relative px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
+									><span class="sr-only">Actions</span></th
+								>
+							</tr>
+						</thead>
+						<tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+							{#each data.apiTokens as token (token.id)}
+								<tr>
+									<td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white"
+										>{token.name}</td
+									>
+									<td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"
+										>{new Date(token.createdAt).toLocaleDateString()}</td
+									>
+									<td class="px-6 py-4 text-right text-sm font-medium">
+										<form
+											method="post"
+											action="?/revokeApiToken"
+											use:enhance={() => {
+												loadingAction = `revokeApiToken-${token.id}`;
+												return async ({ update, result }) => {
+													loadingAction = null;
+													if (result.type === 'success') {
+														toastState.add('Token revoked', 'success');
+													}
+													await update();
+												};
+											}}
+										>
+											<input type="hidden" name="tokenId" value={token.id} />
+											<button
+												type="submit"
+												disabled={loadingAction === `revokeApiToken-${token.id}`}
+												class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+											>
+												{#if loadingAction === `revokeApiToken-${token.id}`}
+													Revoking...
+												{:else}
+													Revoke
+												{/if}
+											</button>
+										</form>
+									</td>
+								</tr>
+							{:else}
+								<tr>
+									<td
+										colspan="3"
+										class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400"
+										>No API tokens found.</td
+									>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
 				</div>
 			{:else if activeTab === 'danger'}
 				<h2 class="mb-4 text-xl font-semibold text-red-600 dark:text-red-400">Danger Zone</h2>

@@ -2,6 +2,7 @@ import { json, redirect } from '@sveltejs/kit';
 import * as auth from '$lib/server/auth.js';
 import * as userFn from '$lib/server/user.js';
 import * as noteFn from '$lib/server/note.js';
+import * as api from '$lib/server/api.js';
 import { getUserActivity } from '$lib/server/activity.js';
 import { Logger } from '$lib/server/logger.js';
 import type { RequestHandler } from './$types.js';
@@ -35,6 +36,9 @@ export const GET: RequestHandler = async (event) => {
 		// Fetch user notes
 		const notes = await noteFn.getUserNotes(userId);
 
+		// Fetch API tokens (metadata only)
+		const apiTokens = await api.listApiTokens(userId);
+
 		// Fetch all user activity
 		const activityLogs = await getUserActivity(userId, null);
 
@@ -58,6 +62,12 @@ export const GET: RequestHandler = async (event) => {
 				createdAt: n.createdAt,
 				updatedAt: n.updatedAt
 			})),
+			apiTokens: apiTokens.map((t) => ({
+				id: t.id,
+				name: t.name,
+				createdAt: t.createdAt,
+				expiresAt: t.expiresAt
+			})),
 			activityLogs: activityLogs.map((l) => ({
 				action: l.action,
 				details: l.details,
@@ -69,6 +79,7 @@ export const GET: RequestHandler = async (event) => {
 		logger.info('User data exported', {
 			userId,
 			noteCount: notes.length,
+			apiTokenCount: apiTokens.length,
 			activityLogCount: activityLogs.length
 		});
 

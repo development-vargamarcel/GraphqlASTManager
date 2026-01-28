@@ -3,6 +3,7 @@ import { GET } from './+server.js';
 import * as userFn from '$lib/server/user.js';
 import * as auth from '$lib/server/auth.js';
 import * as noteFn from '$lib/server/note.js';
+import * as api from '$lib/server/api.js';
 import * as activityFn from '$lib/server/activity.js';
 
 vi.mock('$lib/server/user.js', () => ({
@@ -15,6 +16,10 @@ vi.mock('$lib/server/auth.js', () => ({
 
 vi.mock('$lib/server/note.js', () => ({
 	getUserNotes: vi.fn()
+}));
+
+vi.mock('$lib/server/api.js', () => ({
+	listApiTokens: vi.fn()
 }));
 
 vi.mock('$lib/server/activity.js', () => ({
@@ -74,6 +79,14 @@ describe('GET /demo/lucia/export', () => {
 				updatedAt: new Date()
 			}
 		];
+		const mockTokens = [
+			{
+				id: 'token-1',
+				name: 'Test Token',
+				createdAt: new Date(),
+				expiresAt: null
+			}
+		];
 		const mockActivity = [
 			{
 				action: 'LOGIN',
@@ -85,6 +98,7 @@ describe('GET /demo/lucia/export', () => {
 		(userFn.getUserById as any).mockResolvedValue(mockUser);
 		(auth.getUserSessions as any).mockResolvedValue(mockSessions);
 		(noteFn.getUserNotes as any).mockResolvedValue(mockNotes);
+		(api.listApiTokens as any).mockResolvedValue(mockTokens);
 		(activityFn.getUserActivity as any).mockResolvedValue(mockActivity);
 
 		const event = {
@@ -105,6 +119,8 @@ describe('GET /demo/lucia/export', () => {
 		expect(data.sessions[0].id).toBe('session-1');
 		expect(data.notes).toHaveLength(1);
 		expect(data.notes[0].title).toBe('Test Note');
+		expect(data.apiTokens).toHaveLength(1);
+		expect(data.apiTokens[0].name).toBe('Test Token');
 		expect(data.activityLogs).toHaveLength(1);
 		expect(data.activityLogs[0].action).toBe('LOGIN');
 
