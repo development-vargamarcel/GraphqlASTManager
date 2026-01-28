@@ -237,6 +237,19 @@
 					{/if}
 				</div>
 
+				{#if !isRegister}
+					<div class="flex items-center justify-end">
+						<div class="text-sm">
+							<a
+								href="/demo/lucia/login/forgot"
+								class="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+							>
+								Forgot your password?
+							</a>
+						</div>
+					</div>
+				{/if}
+
 				{#if isRegister}
 					<div class="relative">
 						<label

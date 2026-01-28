@@ -104,6 +104,18 @@ export const apiToken = sqliteTable(
 );
 
 /**
+ * Password Reset Token table definition.
+ * Stores tokens for resetting forgotten passwords.
+ */
+export const passwordResetToken = sqliteTable('password_reset_token', {
+	tokenHash: text('token_hash').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id),
+	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull()
+});
+
+/**
  * Type definition for a Session object inferred from the schema.
  */
 export type Session = typeof session.$inferSelect;

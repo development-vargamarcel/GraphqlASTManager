@@ -61,6 +61,16 @@ The dashboard (`/demo/lucia`) provides authenticated users with account manageme
   - **Revoke All Sessions**: Users can sign out from all devices simultaneously (including the current session) by using "Sign out everywhere".
 - **Danger Zone**: Users can permanently delete their account. This action requires an explicit confirmation by typing "DELETE".
 
+## Password Reset
+
+A "Forgot Password" flow allows users to regain access to their account.
+
+1.  **Request**: User enters their username on the `/demo/lucia/login/forgot` page.
+2.  **Token Generation**: If the user exists, a secure, short-lived (15 minutes) token is generated and stored in the database.
+3.  **Delivery**: In this demo environment, the reset link (containing the token) is logged to the server console. In production, this would be emailed.
+4.  **Reset**: The user visits the link, enters a new password.
+5.  **Completion**: The password is updated, all existing sessions are invalidated (security measure), and the user is automatically logged in with a new session.
+
 ## API Access
 
 Users can generate **Personal Access Tokens (PATs)** to access the API programmatically.

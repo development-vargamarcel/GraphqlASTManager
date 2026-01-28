@@ -57,6 +57,13 @@
       "when": 1769583108401,
       "tag": "0007_military_juggernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1769589652831,
+      "tag": "0008_ambitious_iceman",
+      "breakpoints": true
     }
   ]
 }
