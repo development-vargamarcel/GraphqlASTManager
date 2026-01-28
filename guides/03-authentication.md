@@ -60,3 +60,12 @@ The dashboard (`/demo/lucia`) provides authenticated users with account manageme
   - **Active Sessions**: Users can view a list of all active sessions, including IP address and User Agent. They can revoke any session other than the current one.
   - **Revoke All Sessions**: Users can sign out from all devices simultaneously (including the current session) by using "Sign out everywhere".
 - **Danger Zone**: Users can permanently delete their account. This action requires an explicit confirmation by typing "DELETE".
+
+## API Access
+
+Users can generate **Personal Access Tokens (PATs)** to access the API programmatically.
+
+- **Token Generation**: Users can create named tokens in the "API Access" tab. Tokens are displayed only once upon creation.
+- **Usage**: Tokens must be included in the `Authorization` header as a Bearer token (`Authorization: Bearer <token>`).
+- **Endpoints**: Authenticated API requests can be made to endpoints starting with `/api/v1/`.
+- **Revocation**: Users can revoke specific tokens at any time, immediately invalidating them.

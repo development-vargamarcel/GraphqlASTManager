@@ -1,6 +1,7 @@
 import * as auth from '$lib/server/auth.js';
 import * as userFn from '$lib/server/user.js';
 import * as noteFn from '$lib/server/note.js';
+import * as api from '$lib/server/api.js';
 import * as validation from '$lib/server/validation.js';
 import { logActivity, getUserActivity, clearUserActivity } from '$lib/server/activity.js';
 import { Logger } from '$lib/server/logger.js';
@@ -36,6 +37,7 @@ export const load: PageServerLoad = async (event) => {
 	const sessions = await auth.getUserSessions(user.id);
 	const activityLogs = await getUserActivity(user.id);
 	const notes = await noteFn.getUserNotes(user.id);
+	const apiTokens = await api.listApiTokens(user.id);
 
 	return {
 		user: {
@@ -52,7 +54,8 @@ export const load: PageServerLoad = async (event) => {
 			userAgent: parseUserAgent(s.userAgent)
 		})),
 		activityLogs,
-		notes
+		notes,
+		apiTokens
 	};
 };
 
@@ -495,5 +498,60 @@ export const actions: Actions = {
 		}
 
 		return { message: 'Note deleted successfully' };
+	},
+
+	/**
+	 * Creates a new API token.
+	 */
+	createApiToken: async (event) => {
+		if (!event.locals.session || !event.locals.user) {
+			return fail(401);
+		}
+
+		const formData = await event.request.formData();
+		const name = formData.get('name');
+
+		if (typeof name !== 'string' || name.length < 1 || name.length > 50) {
+			return fail(400, {
+				message: 'Invalid name',
+				errors: { name: 'Name must be 1-50 characters' }
+			});
+		}
+
+		try {
+			const { token, message } = await api.createApiToken(event.locals.user.id, name);
+			logger.info('API token created', { userId: event.locals.user.id });
+			// Return the token so it can be displayed to the user
+			return { message, token };
+		} catch (e) {
+			logger.error('Failed to create API token', e, { userId: event.locals.user.id });
+			return fail(500, { message: 'An unknown error occurred' });
+		}
+	},
+
+	/**
+	 * Revokes an API token.
+	 */
+	revokeApiToken: async (event) => {
+		if (!event.locals.session || !event.locals.user) {
+			return fail(401);
+		}
+
+		const formData = await event.request.formData();
+		const tokenId = formData.get('tokenId');
+
+		if (typeof tokenId !== 'string') {
+			return fail(400, { message: 'Invalid token ID' });
+		}
+
+		try {
+			await api.revokeApiToken(tokenId, event.locals.user.id);
+			logger.info('API token revoked', { userId: event.locals.user.id, tokenId });
+		} catch (e) {
+			logger.error('Failed to revoke API token', e, { userId: event.locals.user.id, tokenId });
+			return fail(500, { message: 'An unknown error occurred' });
+		}
+
+		return { message: 'API token revoked successfully' };
 	}
 };

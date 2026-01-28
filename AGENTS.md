@@ -22,6 +22,7 @@ This project is a SvelteKit application using Drizzle ORM, custom authentication
 - **User**: `id` (text, PK), `username` (text, unique), `passwordHash` (text), `age` (int), `bio` (text).
 - **Session**: `id` (text, PK), `userId` (text, FK), `expiresAt` (int/timestamp).
 - **Note**: `id` (text, PK), `userId` (text, FK), `title` (text), `content` (text), `createdAt` (timestamp), `updatedAt` (timestamp).
+- **ApiToken**: `id` (text, PK), `userId` (text, FK), `tokenHash` (text), `name` (text), `createdAt` (timestamp), `expiresAt` (timestamp).
 
 ## Key Flows
 
@@ -72,6 +73,11 @@ The dashboard (`/demo/lucia`) allows authenticated users to manage their account
     - Create, Edit, and Delete notes.
     - Search and filter notes by title or content.
     - Notes are private to the user.
+
+6.  **API Access**:
+    - Generate Personal Access Tokens (PATs) for programmatic access.
+    - Revoke tokens when no longer needed.
+    - Token is displayed only once at creation.
 
 ### Rate Limiting
 

@@ -81,6 +81,29 @@ export const note = sqliteTable(
 );
 
 /**
+ * API Token table definition.
+ * Stores personal access tokens for API access.
+ */
+export const apiToken = sqliteTable(
+	'api_token',
+	{
+		id: text('id').primaryKey(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => user.id),
+		tokenHash: text('token_hash').notNull(),
+		name: text('name').notNull(),
+		createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+		expiresAt: integer('expires_at', { mode: 'timestamp' })
+	},
+	(table) => {
+		return {
+			apiTokenUserIdIdx: index('api_token_user_id_idx').on(table.userId)
+		};
+	}
+);
+
+/**
  * Type definition for a Session object inferred from the schema.
  */
 export type Session = typeof session.$inferSelect;
@@ -99,3 +122,8 @@ export type ActivityLog = typeof activityLog.$inferSelect;
  * Type definition for a Note object inferred from the schema.
  */
 export type Note = typeof note.$inferSelect;
+
+/**
+ * Type definition for an API Token object inferred from the schema.
+ */
+export type ApiToken = typeof apiToken.$inferSelect;
