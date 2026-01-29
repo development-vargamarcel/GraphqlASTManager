@@ -682,7 +682,7 @@
 							<tbody
 								class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800"
 							>
-								{#each data.activityLogs as log}
+								{#each data.activityLogs as log (log.id)}
 									<tr>
 										<td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-white"
 											>{log.action}</td
@@ -903,7 +903,7 @@
 										</p>
 										{#if note.tags && note.tags.length > 0}
 											<div class="mt-2 flex flex-wrap gap-2">
-												{#each note.tags as tag}
+												{#each note.tags as tag (tag)}
 													<span
 														class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200"
 													>
