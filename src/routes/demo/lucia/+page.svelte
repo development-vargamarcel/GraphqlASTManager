@@ -58,9 +58,6 @@
 	let errors = $derived(
 		form && typeof form === 'object' && 'errors' in form ? (form as any).errors : {}
 	);
-	let message = $derived(
-		form && typeof form === 'object' && 'message' in form ? (form as any).message : null
-	);
 
 	let filteredNotes = $derived(
 		data.notes.filter(

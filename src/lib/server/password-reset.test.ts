@@ -5,7 +5,6 @@ import {
 	consumePasswordResetToken
 } from './password-reset.js';
 import { db } from './db/index.js';
-import * as schema from './db/schema.js';
 
 // Mock DB
 vi.mock('./db/index.js', () => ({

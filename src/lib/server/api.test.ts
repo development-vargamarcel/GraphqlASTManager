@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createApiToken, validateApiToken, revokeApiToken, listApiTokens } from './api.js';
+import { createApiToken, validateApiToken, revokeApiToken } from './api.js';
 import { db } from './db/index.js';
-import crypto from 'node:crypto';
 
 // Mock DB
 vi.mock('./db/index.js', () => ({
