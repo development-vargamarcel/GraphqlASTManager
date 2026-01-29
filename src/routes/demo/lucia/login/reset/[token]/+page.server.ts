@@ -1,4 +1,4 @@
-import { fail, redirect } from '@sveltejs/kit';
+import { fail, redirect, error } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types.js';
 import * as auth from '$lib/server/auth.js';
 import * as userFn from '$lib/server/user.js';
@@ -13,19 +13,14 @@ export const load: PageServerLoad = async ({ params }) => {
 	const userId = await passwordReset.validatePasswordResetToken(token);
 
 	if (!userId) {
-		return error(400, 'Invalid or expired password reset link');
+		error(400, {
+			message: 'Invalid or expired password reset link',
+			errorId: crypto.randomUUID()
+		});
 	}
 
 	return {};
 };
-
-// Helper for load error
-function error(status: number, message: string) {
-	// In SvelteKit load functions, we can throw error
-	// But here we might want to render the page with an error state or redirect
-	// For simplicity, we'll throw the SvelteKit error which renders +error.svelte
-	throw import('@sveltejs/kit').error(status, message);
-}
 
 export const actions: Actions = {
 	default: async (event) => {
@@ -35,10 +30,7 @@ export const actions: Actions = {
 		const password = formData.get('password');
 		const confirmPassword = formData.get('confirmPassword');
 
-		if (
-			!validation.validatePassword(password) ||
-			!validation.validatePassword(confirmPassword)
-		) {
+		if (!validation.validatePassword(password) || !validation.validatePassword(confirmPassword)) {
 			return fail(400, { message: 'Invalid password provided' });
 		}
 

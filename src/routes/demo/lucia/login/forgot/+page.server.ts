@@ -35,7 +35,8 @@ export const actions: Actions = {
 		}
 
 		return {
-			message: 'If an account with that username exists, a reset link has been sent (check server logs for demo).'
+			message:
+				'If an account with that username exists, a reset link has been sent (check server logs for demo).'
 		};
 	}
 };

@@ -15,7 +15,10 @@ test.describe('API Access', () => {
 		await expect(page).toHaveURL('/demo/lucia');
 	});
 
-	test('should allow creating, viewing, using and revoking an API token', async ({ page, request }) => {
+	test('should allow creating, viewing, using and revoking an API token', async ({
+		page,
+		request
+	}) => {
 		// Navigate to API tab
 		await page.click('button:has-text("API Access")');
 		await expect(page.locator('h2')).toContainText('API Access');

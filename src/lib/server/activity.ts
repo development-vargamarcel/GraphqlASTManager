@@ -65,7 +65,7 @@ export async function getUserActivity(
 			.orderBy(desc(table.activityLog.timestamp));
 
 		if (limit !== null) {
-			// @ts-ignore: Dynamic query construction
+			// @ts-expect-error: Dynamic query construction
 			query = query.limit(limit);
 		}
 

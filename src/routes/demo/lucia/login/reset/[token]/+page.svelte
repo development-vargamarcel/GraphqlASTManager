@@ -11,7 +11,20 @@
 
 	let passwordsMatch = $derived(newPassword === confirmPassword);
 	let message = $derived(form?.message);
-	let error = $derived(form?.error); // Generic error if any
+
+	/**
+	 * Calculates the strength of the new password.
+	 * Score ranges from 0 to 4 based on length and character types.
+	 */
+	let strength = $derived.by(() => {
+		let score = 0;
+		if (newPassword.length > 5) score++;
+		if (newPassword.length > 10) score++;
+		if (/[A-Z]/.test(newPassword)) score++;
+		if (/[0-9]/.test(newPassword)) score++;
+		if (/[^A-Za-z0-9]/.test(newPassword)) score++;
+		return Math.min(score, 4);
+	});
 
 	function toggleShowPassword() {
 		showPassword = !showPassword;
@@ -121,12 +134,44 @@
 							{/if}
 						</button>
 					</div>
+					<!-- Strength Meter -->
+					{#if newPassword.length > 0}
+						<div class="mt-2 flex gap-1" aria-hidden="true">
+							{#each Array(4) as _, i (i)}
+								<div
+									class="h-1 flex-1 rounded-full transition-colors duration-300 {i < strength
+										? strength <= 1
+											? 'bg-red-500'
+											: strength === 2
+												? 'bg-yellow-500'
+												: strength === 3
+													? 'bg-blue-500'
+													: 'bg-green-500'
+										: 'bg-gray-200 dark:bg-gray-600'}"
+								></div>
+							{/each}
+						</div>
+						<div aria-live="polite">
+							<p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+								{#if strength <= 1}
+									Weak
+								{:else if strength === 2}
+									Fair
+								{:else if strength === 3}
+									Good
+								{:else}
+									Strong
+								{/if}
+							</p>
+						</div>
+					{/if}
 				</div>
 
 				<div>
 					<label
 						for="confirmPassword"
-						class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm Password</label
+						class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+						>Confirm Password</label
 					>
 					<div class="mt-1">
 						<input

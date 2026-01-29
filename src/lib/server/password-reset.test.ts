@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createPasswordResetToken, validatePasswordResetToken, consumePasswordResetToken } from './password-reset.js';
+import {
+	createPasswordResetToken,
+	validatePasswordResetToken,
+	consumePasswordResetToken
+} from './password-reset.js';
 import { db } from './db/index.js';
-import * as schema from './db/schema.js';
 
 // Mock DB
 vi.mock('./db/index.js', () => ({
@@ -33,7 +36,7 @@ describe('Password Reset Logic', () => {
 	});
 
 	it('validatePasswordResetToken should return null if token not found', async () => {
-		(db.limit as any).mockReturnValueOnce([]); // Mock no result
+		(db as any).limit.mockReturnValueOnce([]); // Mock no result
 
 		const result = await validatePasswordResetToken('invalid-token');
 		expect(result).toBeNull();
@@ -41,7 +44,7 @@ describe('Password Reset Logic', () => {
 
 	it('validatePasswordResetToken should return null and delete if expired', async () => {
 		const expiredDate = new Date(Date.now() - 10000);
-		(db.limit as any).mockReturnValueOnce([{ userId: 'user-123', expiresAt: expiredDate }]);
+		(db as any).limit.mockReturnValueOnce([{ userId: 'user-123', expiresAt: expiredDate }]);
 
 		const result = await validatePasswordResetToken('expired-token');
 		expect(result).toBeNull();
@@ -50,7 +53,7 @@ describe('Password Reset Logic', () => {
 
 	it('validatePasswordResetToken should return userId if valid', async () => {
 		const futureDate = new Date(Date.now() + 10000);
-		(db.limit as any).mockReturnValueOnce([{ userId: 'user-123', expiresAt: futureDate }]);
+		(db as any).limit.mockReturnValueOnce([{ userId: 'user-123', expiresAt: futureDate }]);
 
 		const result = await validatePasswordResetToken('valid-token');
 		expect(result).toBe('user-123');

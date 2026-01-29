@@ -3,6 +3,9 @@ import * as schema from '$lib/server/db/schema.js';
 import { eq, and } from 'drizzle-orm';
 import crypto from 'node:crypto';
 import type { User } from '$lib/server/db/schema.js';
+import { Logger } from '$lib/server/logger.js';
+
+const logger = new Logger('api');
 
 /**
  * Result of validating an API token.
@@ -58,6 +61,7 @@ export async function createApiToken(
 /**
  * Validates an API token.
  * Hashes the provided token and looks up the hash in the database.
+ * Updates the `lastUsedAt` timestamp if the token is valid.
  *
  * @param token - The raw token string provided in the request.
  * @returns A validation result containing the user if valid, or nulls if invalid.
@@ -80,6 +84,17 @@ export async function validateApiToken(token: string): Promise<ApiTokenValidatio
 	}
 
 	const { user, token: tokenRecord } = result[0];
+
+	// Update lastUsedAt
+	try {
+		await db
+			.update(schema.apiToken)
+			.set({ lastUsedAt: new Date() })
+			.where(eq(schema.apiToken.id, tokenRecord.id));
+	} catch (e) {
+		logger.error('Failed to update token lastUsedAt', e, { tokenId: tokenRecord.id });
+	}
+
 	return { session: null, user, token: tokenRecord };
 }
 
@@ -109,7 +124,8 @@ export async function listApiTokens(userId: string) {
 			id: schema.apiToken.id,
 			name: schema.apiToken.name,
 			createdAt: schema.apiToken.createdAt,
-			expiresAt: schema.apiToken.expiresAt
+			expiresAt: schema.apiToken.expiresAt,
+			lastUsedAt: schema.apiToken.lastUsedAt
 		})
 		.from(schema.apiToken)
 		.where(eq(schema.apiToken.userId, userId));

@@ -58,9 +58,6 @@
 	let errors = $derived(
 		form && typeof form === 'object' && 'errors' in form ? (form as any).errors : {}
 	);
-	let message = $derived(
-		form && typeof form === 'object' && 'message' in form ? (form as any).message : null
-	);
 
 	let filteredNotes = $derived(
 		data.notes.filter(
@@ -682,7 +679,7 @@
 							<tbody
 								class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800"
 							>
-								{#each data.activityLogs as log}
+								{#each data.activityLogs as log (log.id)}
 									<tr>
 										<td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900 dark:text-white"
 											>{log.action}</td
@@ -903,7 +900,7 @@
 										</p>
 										{#if note.tags && note.tags.length > 0}
 											<div class="mt-2 flex flex-wrap gap-2">
-												{#each note.tags as tag}
+												{#each note.tags as tag (tag)}
 													<span
 														class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200"
 													>
@@ -992,8 +989,8 @@
 			{:else if activeTab === 'api'}
 				<h2 class="mb-4 text-xl font-semibold text-gray-900 dark:text-white">API Access</h2>
 				<p class="mb-6 text-sm text-gray-500 dark:text-gray-400">
-					Create personal access tokens to access your data programmatically. Treat these tokens like
-					passwords.
+					Create personal access tokens to access your data programmatically. Treat these tokens
+					like passwords.
 				</p>
 
 				{#if displayToken}
@@ -1024,7 +1021,7 @@
 									<p>Copy this token now. You won't be able to see it again!</p>
 									<div class="mt-2 flex items-center gap-2">
 										<code
-											class="block w-full break-all rounded bg-white p-2 font-mono text-gray-800 shadow-sm dark:bg-gray-800 dark:text-gray-200"
+											class="block w-full rounded bg-white p-2 font-mono break-all text-gray-800 shadow-sm dark:bg-gray-800 dark:text-gray-200"
 										>
 											{displayToken}
 										</code>
@@ -1095,8 +1092,9 @@
 						class="flex items-end gap-4"
 					>
 						<div class="flex-1">
-							<label for="token-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-								>Token Name</label
+							<label
+								for="token-name"
+								class="block text-sm font-medium text-gray-700 dark:text-gray-300">Token Name</label
 							>
 							<input
 								type="text"
@@ -1123,7 +1121,9 @@
 				</div>
 
 				<!-- Tokens List -->
-				<div class="overflow-hidden rounded-md border border-gray-200 shadow-sm dark:border-gray-700">
+				<div
+					class="overflow-hidden rounded-md border border-gray-200 shadow-sm dark:border-gray-700"
+				>
 					<table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
 						<thead class="bg-gray-50 dark:bg-gray-700">
 							<tr>
@@ -1136,6 +1136,11 @@
 									scope="col"
 									class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
 									>Created</th
+								>
+								<th
+									scope="col"
+									class="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-300"
+									>Last Used</th
 								>
 								<th
 									scope="col"
@@ -1153,6 +1158,9 @@
 									<td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"
 										>{new Date(token.createdAt).toLocaleDateString()}</td
 									>
+									<td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+										{token.lastUsedAt ? new Date(token.lastUsedAt).toLocaleString() : 'Never'}
+									</td>
 									<td class="px-6 py-4 text-right text-sm font-medium">
 										<form
 											method="post"

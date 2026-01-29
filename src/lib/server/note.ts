@@ -9,6 +9,9 @@ const logger = new Logger('note');
 
 /**
  * Generates a random note ID.
+ * Uses 15 bytes of randomness encoded in Base32 (lowercase).
+ *
+ * @returns A string representing the note ID.
  */
 function generateNoteId() {
 	const bytes = crypto.getRandomValues(new Uint8Array(15));
